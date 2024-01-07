@@ -1,0 +1,82 @@
+﻿@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary navbar-purple">
+    <div class="container">
+        <a class="navbar-brand" href="#">LeviathanRip Blog</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/campaigns/all">Campaigns</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Blogs</a>
+                </li>
+                <AuthorizeView>
+                    <Authorized>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/campaigns">My Campaigns</a>
+                        </li>
+                    </Authorized>
+                </AuthorizeView>
+            </ul>
+            
+            <ul class="navbar-nav ms-auto">
+                <AuthorizeView>
+                    <Authorized>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle @ShowDropDownString" role="button" data-bs-toggle="dropdown" aria-expanded="true" @onclick="ToggleDropDown">
+                                @context.User.Identity?.Name
+                            </a>
+
+                            <ul class="dropdown-menu @ShowDropDownString">
+                                <li>
+                                    <a href="Account/Manage" class="dropdown-item" > Manage Account </a>
+                                </li>
+                                <li>
+                                    <form action="Account/Logout" method="post">
+                                        <AntiforgeryToken/>
+                                        <input href="Account/Manage" type="hidden" name="ReturnUrl" value="@currentUrl"/>
+                                        <button type="submit" class="dropdown-item">
+                                            Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    </Authorized>
+                    <NotAuthorized>
+                        <li class="nav-item">
+                            <a href="Account/Login" class="nav-link">
+                                <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                            </a>
+                        </li>
+                    </NotAuthorized>
+                </AuthorizeView>
+                
+                @*<li class="nav-item">
+                    <a class="nav-link"> <i class="fa-brands fa-github"></i></a>
+                </li>*@
+            </ul>
+            
+        </div>
+    </div>
+</nav>
+
+
+@code {
+    private string? currentUrl;
+
+    private bool _showDropDown = false;
+    public string ShowDropDownString => _showDropDown ? "show" : "";
+
+    public void ToggleDropDown()
+    {
+        _showDropDown = !_showDropDown;
+    }
+
+}

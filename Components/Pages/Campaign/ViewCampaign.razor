@@ -1,0 +1,115 @@
+@rendermode InteractiveServer
+@page "/campaign/{campaign_id:long}"
+@using LeviathanRipBlog.Data.Repositories
+@using Humanizer
+@using LeviathanRipBlog.Data.Models
+@using LeviathanRipBlog.Helpers
+
+@inject ILogger<CreateCampaign> _logger
+@inject ICampaignRepository _campaign_repository
+@inject IBlogRepository _blog_repository
+@inject IUsernameRetriever _username_retriever
+@inject NavigationManager NavManager
+
+@if (_campaign is null)
+{
+    <LoadingSpinner />
+}
+else
+{
+    <div class="jumbotron jumbotron-fluid">
+        <div class="container">
+            <h1 class="display-4">@_campaign.name</h1>
+            <div class="lead fs-5" style="white-space: pre-wrap;">@_campaign.description</div>
+            <hr class="my-4">
+        </div>
+    </div>
+    
+    
+    <div class="row">
+       
+        @if (_blogs is null)
+        {
+            <LoadingSpinner />
+        }
+        else
+        {
+            @if (_blogs.Count <= 0)
+            {
+                <div class="d-flex justify-content-center align-items-center">
+                    <p class="text-secondary">You have no blogs made yet.</p>
+                </div>
+                <div class="d-flex justify-content-center align-items-center">
+                    <a class="btn btn-primary" href="blog/@campaign_id/new"> <i class="fa-solid fa-plus pe-2"></i> Create Blog </a>               
+                </div>
+                
+                
+
+            }
+            else
+            {
+                <AuthorizeView>
+                    <Authorized>
+                         @if (userId == _campaign.owner_id)
+                         {
+                             <div class="d-flex justify-content-end align-items-center pb-3">
+                                 <a class="btn btn-primary" href="blog/@campaign_id/new"> <i class="fa-solid fa-plus pe-2"></i> Create Blog </a>               
+                             </div>
+                         }
+                    </Authorized>
+                 </AuthorizeView>
+                @foreach (var blog in _blogs)
+                {
+                    <div class="col-lg-4 col-sm-10 pb-3">
+                        <div class="card" style="width: 18rem;">
+                            <a href="#!"><img class="card-img-top" src="https://dummyimage.com/700x350/dee2e6/6c757d.jpg" alt="..." /></a>
+                            <div class="card-body">
+                                <h6 class="text-muted small">@blog.publish_date.ConvertUtcToFormattedDate()</h6>
+                                <h5 class="card-title h4">@blog.title</h5>
+                                <p class="card-text">@blog.blog_content.Truncate(50)</p>
+                                <a href="campaign/@campaign_id/blog/@blog.id" class="btn btn-primary ms-0 me-2">View</a>
+                                @if (userId == _campaign.owner_id)
+                                {
+                                    <a href="campaign/@campaign_id/blog/@blog.id/edit" class="btn btn-secondary">Edit</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    </div>
+}
+
+
+
+@code {
+
+    [Parameter]
+    public long campaign_id { get; set; }
+    
+    private campaign? _campaign;
+    private List<blog>? _blogs;
+    private string? userId = "";
+    
+    protected override async Task OnInitializedAsync() {
+        
+        // Get the id of the user accessing this 
+        userId = await _username_retriever.Identity;
+        
+        _campaign = await _campaign_repository.GetCampaignById(campaign_id);
+        
+        if(_campaign == null) {
+            NavManager.NavigateTo("/campaigns");
+            _logger.LogWarning("Campaign id {CampaignId} not found", campaign_id);
+        }
+        else
+        {
+            await GetBlogs();
+        }
+    }
+    
+    private async Task GetBlogs() {
+        _blogs = await _blog_repository.GetCampaignBlogs(campaign_id);
+    }
+}

@@ -1,0 +1,190 @@
+@rendermode InteractiveServer
+
+@page "/blog/{CampaignId:long}/new"
+@using LeviathanRipBlog.Components.Pages.Blog.Models
+@using LeviathanRipBlog.Data.Models
+@using LeviathanRipBlog.Data.Repositories
+
+@inject IBlogRepository BlogRepository
+@inject ILogger<CreateBlog> Logger
+@inject IDocumentStorage DocumentStorage;
+@inject IDocumentRepository DocumentRepository;
+
+<h1> New Blog </h1>
+
+<EditForm method="post" Model="Model" OnValidSubmit="Submit"  FormName="campaign-form">
+    <AntiforgeryToken />
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    
+   <div class="row pb-3 pt-3">
+       <div class="col-lg-8 col-sm-12 pb-3">
+           <InputText id="title" @bind-Value="Model!.Title" class="form-control" placeholder="Title"></InputText>
+       </div>
+   
+       <div class="col-lg-4 col-sm-12 pb-3">
+            <InputDate class="form-control" @bind-Value="@Model.SessionDate" />
+       </div>
+   </div>
+
+    <div class="row">
+        <div class="pb-3">
+            <InputTextArea id="description" @bind-Value="Model!.Content" class="form-control" placeholder="Your blog content goes here." rows="15"></InputTextArea>
+        </div>
+    </div>
+    
+    <div class="row">
+        @if (_errors.Count > 0)
+        {
+            <div>
+                <ul class="text-danger">
+                    @foreach (var error in _errors)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+            </div>
+        }
+        
+        @if (_uploadedFile is not null)
+        {
+            <div>
+                <ul class="list-group pb-3">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <div>
+                            <i class="fa-solid fa-image pe-2"></i> @_uploadedFile.OriginalFileName
+                        </div>
+                        <button class="btn btn-danger btn-sm" type="button" @onclick="RemoveUploadedFile"> Delete File <i class="fa-regular fa-trash-can ps-2"></i> </button>
+                    </li>
+                </ul>
+                <div class="pb-3">
+                    <InputFile class="form-control" multiple disabled/>
+                </div>
+                            
+            </div>
+           
+        }
+        else
+        {
+            <div class="pb-3">
+                <InputFile class="form-control" OnChange="@LoadFiles" multiple/>
+            </div>
+        }
+    </div>
+    
+    <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary">Create</button>
+    </div>
+    
+</EditForm>
+
+@code {
+    
+    [Parameter]
+    public long CampaignId { get; set; }
+    
+    [SupplyParameterFromForm]
+    public BlogFormModel? Model { get; set; } = new();
+    
+    // Max amount of files and errors from upload
+    private const int MaxAllowedFiles = 1;
+    private readonly List<string> _errors = [];
+    
+    // Name of uploaded file
+    private SavedDocumentResponse? _uploadedFile;
+    
+    protected override async Task OnInitializedAsync() {
+        Model!.Username = await UsernameRetriever.Username;   
+        Model!.UserId = (await UsernameRetriever.Identity)!;
+        
+        Model!.CampaignId = CampaignId;
+    }
+
+    private async Task Submit() {
+
+        if (_uploadedFile is null)
+        {
+            _errors.Add("A picture is required.");
+            return;
+        }
+        
+        var blog = Model!.ToNewBlog(Model);
+        try
+        {
+            var rv = await BlogRepository.Insert(blog);
+            if(rv <= -1) throw new Exception("Failed to insert campaign");
+
+           
+            // Add document to blog_document table
+            var blogDocument = CreateBlogDocument();
+            blogDocument.blog_id = rv;
+            
+            var result = await DocumentRepository.Insert(blogDocument);
+            if(result <= -1) throw new Exception("Failed to insert campaign");
+
+            NavigationManager.NavigateTo($"campaign/{CampaignId}/blog/{rv}");
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "Failed to insert campaign");
+        }
+    }
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        _errors.Clear();
+
+        if (e.FileCount > MaxAllowedFiles)
+        {
+            _errors.Add($"Error: Attempting to upload {e.FileCount} files, but only {MaxAllowedFiles} files can be uploaded.");
+        }
+
+        foreach (var file in e.GetMultipleFiles(MaxAllowedFiles))
+        {
+            // Check if the file is an image
+            if (!file.ContentType.StartsWith("image/"))
+            {
+                _errors.Add($"File: {file.Name} is not an image.");
+                continue; // Skip this file and continue with the next one
+            }
+
+            try
+            {
+                _uploadedFile = await DocumentStorage.SaveDocument(file);
+            }
+            catch (Exception ex)
+            {
+                _errors.Add($"File: {file.Name} could not be uploaded. Max size for a file is 50 MB.");
+                Logger.LogWarning(ex, "Document Storage returned an exception.");
+            }
+        }
+    }
+
+    private async Task RemoveUploadedFile()
+    {
+        _errors.Clear(); // Might be unnecessary but just in case
+        
+        // Remove file
+        var rv = await DocumentStorage.RemoveFile(_uploadedFile!.FileIdentifier);
+        
+        // Check if we succeeded or not.
+        if (rv)  _uploadedFile = null;
+        else Logger.LogError("Something went wrong and the file {id} could not be removed.", _uploadedFile.FileIdentifier);
+    }
+
+    private blog_documents CreateBlogDocument()
+    {
+        var date = DateTime.UtcNow;
+        return new blog_documents
+        {
+            document_name = _uploadedFile?.OriginalFileName!,
+            document_identifier = _uploadedFile?.FileIdentifier!,
+            is_deleted = false,
+            created_on = date,
+            created_by = Model!.Username,
+            updated_on = date,
+            updated_by = Model!.Username
+        };
+    }
+}

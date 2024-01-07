@@ -1,0 +1,98 @@
+@rendermode InteractiveServer
+
+@page "/campaign/{campaign_id:long}/blog/{blog_id:long}/edit"
+
+@using LeviathanRipBlog.Data.Repositories
+@using LeviathanRipBlog.Components.Pages.Blog.Models
+@using LeviathanRipBlog.Data.Models
+
+@inject ILogger<EditBlog> _logger
+@inject IBlogRepository _blog_repository
+
+<div class="d-flex justify-content-between align-items-center">
+    <h1>Edit Blog</h1>
+    <button class="btn btn-danger" @onclick="Delete">Delete</button>
+</div>
+
+<EditForm method="post" Model="Model" OnValidSubmit="Submit"  FormName="campaign-form">
+    <AntiforgeryToken />
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+    
+   <div class="row pb-3 pt-3">
+       <div class="col-lg-8 col-sm-12 pb-3">
+           <InputText id="title" @bind-Value="Model!.Title" class="form-control" placeholder="Title"></InputText>
+       </div>
+   
+      <div class="col-lg-4 col-sm-12 pb-3">
+             <InputDate class="form-control" @bind-Value="@Model.SessionDate" />
+     </div>
+   </div>
+
+    <div class="row">
+        <div class="pb-3">
+            <InputTextArea id="description" @bind-Value="Model!.Content" class="form-control" placeholder="Your blog content goes here." rows="15"></InputTextArea>
+        </div>
+        
+    </div>
+    
+    <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary">Update</button>
+    </div>
+    
+</EditForm>
+
+@code {
+    [Parameter]
+    public long blog_id { get; set; }
+    
+    [Parameter]
+    public long campaign_id { get; set; }
+    
+    [SupplyParameterFromForm]
+    public BlogFormModel? Model { get; set; } = new();
+    
+    private blog Blog = new();
+    
+    protected override async Task OnInitializedAsync() {
+        Model!.Username = await UsernameRetriever.Username;   
+        Model!.UserId = (await UsernameRetriever.Identity)!;
+        Model!.CampaignId = campaign_id;
+        
+        var blog = await _blog_repository.GetBlog(blog_id);
+        Blog = blog!;
+        Model = Model.ToFormModel(Blog);
+    }
+
+    private async Task Submit() {
+        var updatedBlog = Model!.ToUpdateBlog(Model);
+        updatedBlog.updated_by = await UsernameRetriever.Username;
+        
+        try
+        {
+            await _blog_repository.Update(updatedBlog);
+            NavigationManager.NavigateTo($"campaign/{campaign_id}");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to insert campaign");
+        }
+    }
+    
+    private async Task Delete() {
+        try
+        {
+            Blog.updated_by = await UsernameRetriever.Username;
+            Blog.updated_on = DateTime.UtcNow;
+            Blog.is_deleted = true;
+        
+            await _blog_repository.Update(Blog);
+            NavigationManager.NavigateTo($"/campaign/{campaign_id}");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to delete campaign");
+        }
+    }
+}

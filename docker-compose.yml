@@ -1,0 +1,33 @@
+﻿
+version: '3.4'
+
+services:
+  leviathanripblog:
+    image: web-server
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7000:8080"
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DbConnection=User ID=postgres;Password=password;Host=db;Port=5432;Database=LeviathanRipBlog;Pooling=true;Connection Lifetime=0;
+    
+    volumes:
+      - ./DataProtection-Keys:/home/app/.aspnet/DataProtection-Keys
+    
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: LeviathanRipBlog
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
