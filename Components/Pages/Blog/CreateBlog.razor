@@ -121,7 +121,7 @@
             blogDocument.blog_id = rv;
             
             var result = await DocumentRepository.Insert(blogDocument);
-            if(result <= -1) throw new Exception("Failed to insert campaign");
+            if(result <= -1) throw new Exception("Failed to insert document");
 
             NavigationManager.NavigateTo($"campaign/{CampaignId}/blog/{rv}");
         }

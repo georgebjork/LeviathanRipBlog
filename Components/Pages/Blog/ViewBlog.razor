@@ -13,25 +13,42 @@
 
 <div>
     <article>
-        <figure class="mb-4">
-            @*<img class="img-fluid rounded" src="https://dummyimage.com/1200x400/ced4da/6c757d.jpg" alt="..."/>*@
-            <img  class="img-fluid rounded" src="@imageSrc" alt="Loaded image" />
-        </figure>
-        
-        <!-- Post title-->
-        <h1 class="fw-bolder mb-1">@_blog.title</h1>
-        <!-- Post meta content-->
-        <div class="text-muted fst-italic mb-2">Posted on: @_blog.publish_date.ConvertUtcToFormattedDate() by @_blog.created_by</div>
-        
-        <div class="text-muted fst-italic mb-2">Campaign: @_campaign.name</div>
-        
-        <div class="text-muted fst-italic mb-2">Session on: @_blog.session_date.ConvertUtcToFormattedDate()</div>
-        
-        <hr/>
-        
-        <section class="mb-5">
-             <div class="lead fs-5" style="white-space: pre-wrap;">@_blog.blog_content</div>
-        </section>
+        @if (_blog is null)
+        {
+            <LoadingSpinner />
+        }
+        else
+        {
+            @if (!_isImageLoading && _imageSrc is not null)
+            {
+                <figure class="mb-4">
+                    <img class="img-fluid rounded" src="@_imageSrc" alt="Loaded image"/>
+                </figure>
+            }
+            else if (_isImageLoading)
+            {
+                <div>
+                    <LoadingSpinner />
+                    <div class="text-muted fst-italic mb-2">Loading Image...</div>
+                </div>
+            }
+
+
+            <!-- Post title-->
+            <h1 class="fw-bolder mb-1">@_blog.title</h1>
+            <!-- Post meta content-->
+            <div class="text-muted fst-italic mb-2">Posted on: @_blog.publish_date.ConvertUtcToFormattedDate() by @_blog.created_by</div>
+
+            <div class="text-muted fst-italic mb-2">Campaign: @_campaign!.name</div>
+
+            <div class="text-muted fst-italic mb-2">Session on: @_blog.session_date.ConvertUtcToFormattedDate()</div>
+
+            <hr/>
+
+            <section class="mb-5">
+                <div class="lead fs-5" style="white-space: pre-wrap;">@_blog.blog_content</div>
+            </section>
+        }
     </article>
 </div>
 
@@ -42,25 +59,42 @@
     [Parameter]
     public long CampaignId { get; set; }
     
-    private blog _blog = new();
-    private campaign _campaign = new();
+    private blog? _blog = new();
+    private campaign? _campaign = new();
     private string? _blogDocument;
 
-    private string imageSrc;
-    
-    protected override async Task OnInitializedAsync() {
+    private string? _imageSrc;
+
+    private bool _isImageLoading = true; // Flag to indicate image loading status
+
+    protected override async Task OnInitializedAsync()
+    {
         _blog = await BlogRepository.GetBlog(BlogId);
         _campaign = await CampaignRepository.GetCampaignById(_blog.campaign_id);
-        _blogDocument = await DocumentRepository.GetDocumentIdentifierByBlogId(_blog.id);
+    
+        // Load image in a separate task without awaiting it here
+        _ = LoadImageAsync();
+    }
 
-        if (_blogDocument is not null)
+    private async Task LoadImageAsync()
+    {
+        try
         {
-            var (imageData, mimeType) = await FileDocumentStorage.RetrieveDocument(_blogDocument);
-            if (imageData.Length > 0)
+            _blogDocument = await DocumentRepository.GetDocumentIdentifierByBlogId(_blog!.id);
+            
+            if (_blogDocument is not null)
             {
-                imageSrc = $"data:{mimeType};base64," + Convert.ToBase64String(imageData);
+                var (imageData, mimeType) = await FileDocumentStorage.RetrieveDocument(_blogDocument);
+                if (imageData.Length > 0)
+                {
+                    _imageSrc = $"data:{mimeType};base64," + Convert.ToBase64String(imageData);
+                }
             }
         }
+        finally
+        {
+            _isImageLoading = false;
+            StateHasChanged(); // Trigger UI update
+        }
     }
-    
 }

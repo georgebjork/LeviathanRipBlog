@@ -4,8 +4,8 @@
 @using Humanizer
 @using LeviathanRipBlog.Data.Models
 
-@inject ILogger<MyCampaigns> _logger
-@inject ICampaignRepository _campaign_repository
+@inject ILogger<MyCampaigns> Logger
+@inject ICampaignRepository CampaignRepository
 @inject NavigationManager NavManager
 
 
@@ -58,10 +58,10 @@
 
         if (ownerId == null)
         {
-            _logger.LogError("User id came back as null");
+            Logger.LogError("User id came back as null");
             throw new ApplicationException("User id came back as null");
         }
 
-        campaigns = await _campaign_repository.GetCampaignsByUserId(ownerId);
+        campaigns = await CampaignRepository.GetCampaignsByUserId(ownerId);
     }
 }

@@ -1,13 +1,15 @@
 @rendermode InteractiveServer
 
-@page "/campaign/{campaign_id:long}/blog/{blog_id:long}/edit"
+@page "/campaign/{CampaignId:long}/blog/{BlogId:long}/edit"
 
 @using LeviathanRipBlog.Data.Repositories
 @using LeviathanRipBlog.Components.Pages.Blog.Models
 @using LeviathanRipBlog.Data.Models
 
-@inject ILogger<EditBlog> _logger
-@inject IBlogRepository _blog_repository
+@inject ILogger<EditBlog> Logger
+@inject IBlogRepository BlogRepository
+@inject IDocumentStorage DocumentStorage;
+@inject IDocumentRepository DocumentRepository;
 
 <div class="d-flex justify-content-between align-items-center">
     <h1>Edit Blog</h1>
@@ -34,8 +36,46 @@
         <div class="pb-3">
             <InputTextArea id="description" @bind-Value="Model!.Content" class="form-control" placeholder="Your blog content goes here." rows="15"></InputTextArea>
         </div>
-        
     </div>
+    
+    <div class="row">
+            @if (_errors.Count > 0)
+            {
+                <div>
+                    <ul class="text-danger">
+                        @foreach (var error in _errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+            
+            @if (!_isDocumentDeleted && _uploadedFile is not null)
+            {
+                <div>
+                    <ul class="list-group pb-3">
+                        <li class="list-group-item d-flex justify-content-between">
+                            <div>
+                                <i class="fa-solid fa-image pe-2"></i> @_uploadedFile!.document_name
+                            </div>
+                            <button class="btn btn-danger btn-sm" type="button" @onclick="RemoveUploadedFile"> Delete File <i class="fa-regular fa-trash-can ps-2"></i> </button>
+                        </li>
+                    </ul>
+                    <div class="pb-3">
+                        <InputFile class="form-control" multiple disabled/>
+                    </div>
+                                
+                </div>
+               
+            }
+            else
+            {
+                <div class="pb-3">
+                    <InputFile class="form-control" OnChange="@LoadFiles" multiple/>
+                </div>
+            }
+        </div>
     
     <div class="d-grid gap-2">
         <button type="submit" class="btn btn-primary">Update</button>
@@ -45,54 +85,138 @@
 
 @code {
     [Parameter]
-    public long blog_id { get; set; }
+    public long BlogId { get; set; }
     
     [Parameter]
-    public long campaign_id { get; set; }
+    public long CampaignId { get; set; }
     
     [SupplyParameterFromForm]
     public BlogFormModel? Model { get; set; } = new();
     
-    private blog Blog = new();
+    private blog _blog = new();
+    
+    // Max amount of files and errors from upload
+    private const int MaxAllowedFiles = 1;
+    private readonly List<string> _errors = [];
+    
+    // Get the current document name and id
+    private blog_documents? _uploadedFile;
+    private bool _isDocumentDeleted = false;
+    
     
     protected override async Task OnInitializedAsync() {
         Model!.Username = await UsernameRetriever.Username;   
         Model!.UserId = (await UsernameRetriever.Identity)!;
-        Model!.CampaignId = campaign_id;
+        Model!.CampaignId = CampaignId;
         
-        var blog = await _blog_repository.GetBlog(blog_id);
-        Blog = blog!;
-        Model = Model.ToFormModel(Blog);
+        var blog = await BlogRepository.GetBlog(BlogId);
+        _blog = blog!;
+        Model = Model.ToFormModel(_blog);
+
+        _uploadedFile = await DocumentRepository.GetDocumentByBlogId(BlogId);
+        if (_uploadedFile is null) _isDocumentDeleted = true;
     }
 
     private async Task Submit() {
+        
+        if (_uploadedFile!.is_deleted)
+        {
+            _errors.Add("A picture is required.");
+            return;
+        }
+        
         var updatedBlog = Model!.ToUpdateBlog(Model);
         updatedBlog.updated_by = await UsernameRetriever.Username;
         
         try
         {
-            await _blog_repository.Update(updatedBlog);
-            NavigationManager.NavigateTo($"campaign/{campaign_id}");
+            await BlogRepository.Update(updatedBlog);
+
+            await DocumentRepository.Update(_uploadedFile);
+            
+            NavigationManager.NavigateTo($"campaign/{CampaignId}/blog/{BlogId}");
+            
+            
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to insert campaign");
+            Logger.LogError(e, "Failed to insert campaign");
         }
     }
     
     private async Task Delete() {
         try
         {
-            Blog.updated_by = await UsernameRetriever.Username;
-            Blog.updated_on = DateTime.UtcNow;
-            Blog.is_deleted = true;
+            _blog.updated_by = await UsernameRetriever.Username;
+            _blog.updated_on = DateTime.UtcNow;
+            _blog.is_deleted = true;
         
-            await _blog_repository.Update(Blog);
-            NavigationManager.NavigateTo($"/campaign/{campaign_id}");
+            await BlogRepository.Update(_blog);
+            NavigationManager.NavigateTo($"/campaign/{CampaignId}");
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to delete campaign");
+            Logger.LogError(e, "Failed to delete campaign");
         }
+    }
+
+
+    private async Task LoadFiles(InputFileChangeEventArgs e)
+    {
+        _errors.Clear();
+
+        if (e.FileCount > MaxAllowedFiles)
+        {
+            _errors.Add($"Error: Attempting to upload {e.FileCount} files, but only {MaxAllowedFiles} files can be uploaded.");
+        }
+
+        foreach (var file in e.GetMultipleFiles(MaxAllowedFiles))
+        {
+            // Check if the file is an image
+            if (!file.ContentType.StartsWith("image/"))
+            {
+                _errors.Add($"File: {file.Name} is not an image.");
+                continue; // Skip this file and continue with the next one
+            }
+
+            try
+            {
+                var newUploadedFile = await DocumentStorage.SaveDocument(file);
+                _uploadedFile!.document_identifier = newUploadedFile.FileIdentifier;
+                _uploadedFile!.document_name = newUploadedFile.OriginalFileName;
+                _uploadedFile!.is_deleted = false;
+                _uploadedFile!.updated_on = DateTime.UtcNow;
+                _uploadedFile!.updated_by = await UsernameRetriever.Username;
+
+                _isDocumentDeleted = false;
+            }
+            catch (Exception ex)
+            {
+                _errors.Add($"File: {file.Name} could not be uploaded. Max size for a file is 50 MB.");
+                Logger.LogWarning(ex, "Document Storage returned an exception.");
+            }
+        }
+    }
+    
+
+    private async Task RemoveUploadedFile()
+    {
+        _errors.Clear(); // Might be unnecessary but just in case
+        
+        // Remove file from storage
+        var rv = await DocumentStorage.RemoveFile(_uploadedFile!.document_identifier);
+        
+        // Check if we succeeded or not.
+        if (rv)
+        {
+            _uploadedFile.is_deleted = true;
+            _uploadedFile.updated_on = DateTime.UtcNow;
+            _uploadedFile.updated_by = Model!.Username;
+            
+            await DocumentRepository.Update(_uploadedFile);
+            _isDocumentDeleted = true;
+
+        }
+        else Logger.LogError("Something went wrong and the file {id} could not be removed.", _uploadedFile.document_identifier);
     }
 }
