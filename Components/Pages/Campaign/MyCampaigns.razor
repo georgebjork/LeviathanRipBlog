@@ -10,7 +10,18 @@
 
 
 <div>
-    <h3>My Campaigns</h3>
+    <div class="d-flex justify-content-between">
+        <div><h3>My Campaigns</h3></div>
+            
+        <AuthorizeView>
+            <Authorized>
+                <div>
+                    <a class="btn btn-primary" href="/campaigns/new"> <i class="fa-solid fa-plus pe-2"></i> Create Campaign </a>
+                </div>
+            </Authorized>
+        </AuthorizeView>
+    </div>
+    
     @if (campaigns == null)
     {
         <LoadingSpinner />
