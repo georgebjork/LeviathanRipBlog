@@ -14,7 +14,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DbConnection=User ID=postgres;Password=password;Host=db;Port=5432;Database=LeviathanRipBlog;Pooling=true;Connection Lifetime=0;
-      - file_root_path=/storage/blog
+      - file_root_path=/c/storage/blog
     volumes:
       - ./DataProtection-Keys:/home/app/.aspnet/DataProtection-Keys
       - blog_storage:/c/storage/blog
