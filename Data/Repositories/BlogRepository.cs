@@ -6,6 +6,7 @@ public interface IBlogRepository : IBaseRepository{
     
     Task<List<blog>> GetCampaignBlogs(long campaignId);
     Task<blog> GetBlog(long blogId);
+    Task<List<blog>> GetRecentBlogs(int numBlogs);
 }
 
 public class BlogRepository : BasePgRepository, IBlogRepository {
@@ -28,5 +29,13 @@ public class BlogRepository : BasePgRepository, IBlogRepository {
         await using var conn = await GetNewOpenConnection();
         var rv = await conn.QueryFirstOrDefaultAsync<blog>(sql, new {blogId});
         return rv;
+    }
+
+    public async Task<List<blog>> GetRecentBlogs(int numBlogs)
+    {
+        var sql = @"SELECT * FROM blog WHERE is_deleted = false ORDER BY id DESC LIMIT @num";
+        await using var conn = await GetNewOpenConnection();
+        var rv = await conn.QueryAsync<blog>(sql, new {num = numBlogs});
+        return rv.ToList();
     }
 }

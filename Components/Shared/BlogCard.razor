@@ -1,0 +1,74 @@
+﻿@using LeviathanRipBlog.Data.Models
+@using LeviathanRipBlog.Helpers
+@using Humanizer
+@using LeviathanRipBlog.Data.Repositories
+
+@inject IDocumentRepository DocumentRepository
+@inject IDocumentStorage FileDocumentStorage
+
+<div class="card mb-4">
+    <a href="#!">
+        @if (_isImageLoading)
+        {
+            <img class="card-img-top" src="https://dummyimage.com/700x350/dee2e6/6c757d.jpg" alt="..."/>
+        }
+        else
+        {
+            <img class="card-img-top" src="@_imageSrc" alt="..."/>
+        }
+    </a>
+    <div class="card-body">
+        <div class="small text-muted">@Blog.publish_date.ConvertUtcToFormattedDate()</div>
+        <h2 class="card-title h4">@Blog.title</h2>
+        <p class="card-text">@Blog.blog_content.Truncate(50)</p>
+        
+        <div class="d-flex justify-content-between">
+            <a class="btn btn-primary" href="campaign/@Blog.campaign_id/blog/@Blog.id">Read more <i class="fa-solid fa-arrow-right ps-2"></i> </a>
+            @if (IsOwner)
+            {
+                <a class="btn btn-secondary" href="campaign/@Blog.campaign_id/blog/@Blog.id/edit">Edit  <i class="fa-solid fa-pen-to-square ps-2"></i> </a>
+            }
+        </div>
+        
+    </div>
+</div>
+
+
+@code {
+    [Parameter]
+    public blog Blog { get; set; } = new();
+    
+    [Parameter]
+    public bool IsOwner { get; set; }
+    
+    private string? _blogDocument;
+    private string? _imageSrc;
+    private bool _isImageLoading = true; // Flag to indicate image loading status
+
+    protected override async Task OnInitializedAsync()
+    {
+        _ = LoadImageAsync();
+    }
+
+    private async Task LoadImageAsync()
+    {
+        try
+        {
+            _blogDocument = await DocumentRepository.GetDocumentIdentifierByBlogId(Blog!.id);
+            
+            if (_blogDocument is not null)
+            {
+                var (imageData, mimeType) = await FileDocumentStorage.RetrieveDocument(_blogDocument);
+                if (imageData.Length > 0)
+                {
+                    _imageSrc = $"data:{mimeType};base64," + Convert.ToBase64String(imageData);
+                }
+            }
+        }
+        finally
+        {
+            _isImageLoading = false;
+            StateHasChanged(); // Trigger UI update
+        }
+    }
+}

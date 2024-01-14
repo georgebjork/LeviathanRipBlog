@@ -71,7 +71,9 @@
     {
         _blog = await BlogRepository.GetBlog(BlogId);
         _campaign = await CampaignRepository.GetCampaignById(_blog.campaign_id);
-    
+        
+        if(_blog is null || _campaign is null) NavigationManager.NavigateTo("/");
+        
         // Load image in a separate task without awaiting it here
         _ = LoadImageAsync();
     }

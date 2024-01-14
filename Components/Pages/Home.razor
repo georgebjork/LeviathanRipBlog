@@ -1,8 +1,72 @@
 ﻿@rendermode InteractiveServer
 @page "/"
+@using LeviathanRipBlog.Data.Models
+@using LeviathanRipBlog.Data.Repositories
+@inject IBlogRepository BlogRepository
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="py-5 border-bottom mb-4">
+    <div class="container">
+        <div class="text-center my-5">
+            <h1 class="fw-bolder">Welcome to the Leviathan Rip Blog!</h1>
+            <p class="lead mb-0">Here you can find blogs retelling various sessions from the LeviathanRip campaign and other campaigns.</p>
+        </div>
+    </div>
+</div>
 
-Welcome to your new app.
+
+<div class="row d-flex justify-content-center">
+     @if (_blogs is null)
+    {
+        <LoadingSpinner />
+    }
+    else
+    {
+        if (_blogs.Count <= 0 && RecentBlog is null)
+        {
+            <div class="d-flex justify-content-center align-items-center">
+                <p class="text-secondary">There are no blog posts yet.</p>
+            </div>
+        }
+        else
+        {
+            @* Most recent blog *@
+            <div class="col-lg-8">
+                <div>
+                    <BlogCard Blog="@RecentBlog"/>
+                </div>
+                
+                <div class="row">
+                    @foreach (var blog in _blogs)
+                    {
+                        <div class="col-lg-6">
+                            <BlogCard Blog="@blog"/>
+                        </div>
+
+                    }
+                </div>
+            </div>
+        }
+    }
+</div>
+    
+   
+@code {
+
+    private List<blog>? _blogs = new();
+    
+    private blog? RecentBlog { get; set; } = new();
+    
+
+    protected override async Task OnInitializedAsync()
+    {
+        _blogs = await BlogRepository.GetRecentBlogs(5);
+
+        if (_blogs is null) return;
+
+        RecentBlog = _blogs.FirstOrDefault();
+        _blogs.Remove(RecentBlog!);
+    }
+
+}
