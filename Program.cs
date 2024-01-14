@@ -105,8 +105,6 @@ async Task CreateRoles(IServiceProvider serviceProvider) {
 
     //Here you create the super admin who will maintain the web app
     await AddAdminUser(userManager, "georgebjork@outlook.com", "password");
-    await AddAdminUser(userManager, "georgebjork+test@outlook.com", "password");
-    
 }
 
 async Task AddAdminUser(UserManager<ApplicationUser> userManager, string username, string password) {

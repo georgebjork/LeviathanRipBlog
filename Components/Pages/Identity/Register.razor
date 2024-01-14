@@ -79,7 +79,7 @@
         Invitation = await UserRepository.GetInvite(InviteId);
         if (Invitation is null || Invitation.claimed_on is not null || Invitation.is_deleted)
         {
-            RedirectManager.RedirectTo(ReturnUrl);
+            RedirectManager.RedirectTo("/");
         }
         
         Input.Email = Invitation.sent_to_email;
