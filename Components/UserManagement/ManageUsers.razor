@@ -2,8 +2,10 @@
 @using Microsoft.AspNetCore.Authorization
 @using LeviathanRipBlog.Settings
 @using LeviathanRipBlog.Data
+@using LeviathanRipBlog.Data.Models
 @using LeviathanRipBlog.Data.Repositories
 @using Microsoft.AspNetCore.Identity
+@using LeviathanRipBlog.Components.UserManagement.Models
 
 @rendermode InteractiveServer
 @attribute [Authorize(Roles = Roles.ADMIN)]
@@ -16,7 +18,7 @@
     
     <div class="mb-2 d-flex justify-content-md-between">
         <div class="title"> <h3> Current Users </h3> </div>
-        <div class="add-user"> <button class="btn btn-primary" type="button"> <i class="fa-solid fa-plus pe-2"></i> Add User</button> </div>
+        <div class="add-user"> <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#add-user-modal"> <i class="fa-solid fa-plus pe-2"></i> Add User </button> </div>
     </div>
     
     <div class="mb-2"> <hr /> </div>
@@ -25,11 +27,11 @@
         <div class="col">
             <table class="table table-striped table-bordered">
                 <thead>
-                    <tr>
-                        <th scope="col">User Id</th>
-                        <th scope="col">Email</th>
-                        <th scope="col" style="width: 20%;">Actions</th>
-                    </tr>
+                <tr>
+                    <th scope="col">User Id</th>
+                    <th scope="col">Email</th>
+                    <th scope="col" style="width: 20%;">Actions</th>
+                </tr>
                 </thead>
                 <tbody>
                 @if (_users is null)
@@ -61,13 +63,85 @@
             </table>
         </div>
     </div>
+    
+    
+    <div class="mb-2 d-flex justify-content-md-between pt-5">
+        <div class="title"> <h3> Invited Users </h3> </div>
+    </div>
+    <div class="mb-2"> <hr /> </div>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped table-bordered">
+                <thead>
+                <tr>
+                    <th scope="col">Email</th>
+                    <th scope="col">Invite Link</th>
+                    <th scope="col" style="width: 20%;">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                @if (_invitations is null)
+                {
+                    <LoadingSpinner />
+                }
+                else
+                {
+                    @foreach (var invite in _invitations)
+                    {
+                        <tr>
+                            <td>@invite.sent_to_email</td>
+                            <td>@invite.InviteUrl</td>
+                            <td>
+                                <div class="d-flex justify-content-evenly">
+                                    <button class="btn btn-danger btn-sm" type="button"> <i class="fa-solid fa-trash pe2 "></i> Revoke Invite </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 
+<div class="modal fade" id="add-user-modal" tabindex="-1" aria-labelledby="add-user-modal-label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="add-user-modal-label">Invite User</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          <EditForm method="post" Model="Model" OnValidSubmit="Submit"  FormName="invite-form">
+              <AntiforgeryToken />
+              <DataAnnotationsValidator />
+            
+              <div class="row pb-3 pt-3">
+                  <div class="col-lg-12">
+                      <InputText type="email" id="title" @bind-Value="Model!.Email" class="form-control" placeholder="Email"></InputText>
+                      <ValidationMessage For="() => Model!.Email" class="text-danger"/>
+                  </div>
+              </div>
+              <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Add User</button>
+              </div>
+          </EditForm>
+      </div>
+    </div>
+  </div>
 </div>
 
 
-@code {
 
+@code {
+    
+    [SupplyParameterFromForm]
+    private UserInviteFormModel? Model { get; set; } = new();
+    
     private List<ApplicationUser>? _users;
+    private List<user_invitation>? _invitations;
 
     protected override async Task OnInitializedAsync()
     {
@@ -82,6 +156,36 @@
         {
             if (await UserManager.IsInRoleAsync(user, Roles.ADMIN)) { user.IsAdmin = true; }
         }
+        
+        // Get invited users 
+        _invitations = await UserRepository.GetInvites();
+
+        foreach (var invite in _invitations)
+        {
+            invite.InviteUrl = NavigationManager.BaseUri + $"register/{invite.invitation_identifier}";
+        }
+    }
+
+    private async Task Submit()
+    {
+        var username = await UsernameRetriever.Username;
+        var date = DateTime.UtcNow;
+        
+        // Generate user invite
+        var invite = new user_invitation
+        {
+            invitation_identifier = Guid.NewGuid().ToString(),
+            sent_to_email = Model!.Email,
+            sent_by_user = username,
+            expires_on = date.AddDays(30),
+            created_on = date,
+            created_by = username,
+            updated_on = date,
+            updated_by = username
+        };
+        
+        await UserRepository.Insert(invite);
+        await OnInitializedAsync();
     }
 
 
@@ -129,5 +233,5 @@
             _users!.RemoveAll(u => u.Id == userId);
         }
     }
-
 }
+

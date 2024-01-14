@@ -2,6 +2,7 @@ using LeviathanRipBlog;
 using LeviathanRipBlog.Components;
 using LeviathanRipBlog.Components.Account;
 using LeviathanRipBlog.Data;
+using LeviathanRipBlog.Middleware;
 using LeviathanRipBlog.Settings;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -44,6 +45,8 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 RegisterServices.Configure(services: builder.Services);
 
 var app = builder.Build();
+
+app.UseMiddleware<BlockIdentityPathMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -3,8 +3,8 @@
 @using LeviathanRipBlog.Components.Pages.Campaign.Models
 @using LeviathanRipBlog.Data.Repositories
 
-@inject ILogger<CreateCampaign> _logger
-@inject ICampaignRepository _campaign_repository
+@inject ILogger<CreateCampaign> Logger
+@inject ICampaignRepository CampaignRepository
 
 <EditForm method="post" Model="Model" OnValidSubmit="Submit"  FormName="campaign-form">
     <AntiforgeryToken />
@@ -44,13 +44,13 @@
 
         try
         {
-            var rv = await _campaign_repository.Insert(campaign);
+            var rv = await CampaignRepository.Insert(campaign);
             if(rv <= -1) throw new Exception("Failed to insert campaign");
             NavigationManager.NavigateTo("/campaigns");
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to insert campaign");
+            Logger.LogError(e, "Failed to insert campaign");
         }
     }
 }
