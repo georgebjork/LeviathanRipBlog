@@ -10,6 +10,7 @@ public static class RegisterServices {
         services.AddTransient<ICampaignRepository, CampaignRepository>();
         services.AddTransient<IBlogRepository, BlogRepository>();
         services.AddTransient<IDocumentRepository, DocumentRepository>();
+        services.AddTransient<IUserRepository, UserRepository>();
         
         // Services
         services.AddTransient<IUsernameRetriever, UsernameRetriever>();

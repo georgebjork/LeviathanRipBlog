@@ -1,4 +1,5 @@
-﻿@rendermode InteractiveServer
+﻿@using LeviathanRipBlog.Settings
+@rendermode InteractiveServer
 @inject NavigationManager NavigationManager
 
 
@@ -30,25 +31,38 @@
                     <Authorized>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle @ShowDropDownString" role="button" data-bs-toggle="dropdown" aria-expanded="true" @onclick="ToggleDropDown">
+                                <i class="fa-regular fa-id-badge pe-2"></i>
                                 @context.User.Identity?.Name
                             </a>
-
+                
                             <ul class="dropdown-menu @ShowDropDownString">
+                                
+                                @* Admin-specific option *@
+                                <AuthorizeView Roles=@Roles.ADMIN >
+                                    <Authorized  Context="innerContext">
+                                        <li>
+                                            <a href="manage-users" class="dropdown-item"> <i class="fa-solid fa-users pe-2"></i> Manage Users </a>
+                                        </li>
+                                    </Authorized>
+                                </AuthorizeView>
+                
+                                @* General options for all authorized users *@
                                 <li>
-                                    <a href="Account/Manage" class="dropdown-item" > Manage Account </a>
+                                    <a href="Account/Manage" class="dropdown-item"> <i class="fa-solid fa-user pe-2"></i> Manage Account </a>
                                 </li>
                                 <li>
                                     <form action="Account/Logout" method="post">
                                         <AntiforgeryToken/>
                                         <input href="Account/Manage" type="hidden" name="ReturnUrl" value="@currentUrl"/>
                                         <button type="submit" class="dropdown-item">
-                                            Logout
+                                            <i class="fa-solid fa-right-from-bracket pe-2"></i> Logout
                                         </button>
                                     </form>
                                 </li>
                             </ul>
                         </li>
                     </Authorized>
+                
                     <NotAuthorized>
                         <li class="nav-item">
                             <a href="Account/Login" class="nav-link">
@@ -57,7 +71,8 @@
                         </li>
                     </NotAuthorized>
                 </AuthorizeView>
-                
+
+                 
                 @*<li class="nav-item">
                     <a class="nav-link"> <i class="fa-brands fa-github"></i></a>
                 </li>*@

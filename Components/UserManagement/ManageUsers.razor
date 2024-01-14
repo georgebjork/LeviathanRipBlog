@@ -1,0 +1,133 @@
+﻿@page "/manage-users"
+@using Microsoft.AspNetCore.Authorization
+@using LeviathanRipBlog.Settings
+@using LeviathanRipBlog.Data
+@using LeviathanRipBlog.Data.Repositories
+@using Microsoft.AspNetCore.Identity
+
+@rendermode InteractiveServer
+@attribute [Authorize(Roles = Roles.ADMIN)]
+
+@inject IUserRepository UserRepository;
+@inject UserManager<ApplicationUser> UserManager;
+    
+
+<div class="mt-4">
+    
+    <div class="mb-2 d-flex justify-content-md-between">
+        <div class="title"> <h3> Current Users </h3> </div>
+        <div class="add-user"> <button class="btn btn-primary" type="button"> <i class="fa-solid fa-plus pe-2"></i> Add User</button> </div>
+    </div>
+    
+    <div class="mb-2"> <hr /> </div>
+
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th scope="col">User Id</th>
+                        <th scope="col">Email</th>
+                        <th scope="col" style="width: 20%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (_users is null)
+                {
+                    <LoadingSpinner />
+                }
+                else
+                {
+                    @foreach (var user in _users)
+                    {
+                        <tr>
+                            <td>@user.Id</td>
+                            <td>@user.Email</td>
+                            <td>
+                                <div class="d-flex justify-content-evenly">
+                                    @if (user.IsAdmin) {
+                                        <button class="btn btn-success btn-sm" type="button" @onclick="async () => await RevokeAdmin(user.Id)">Revoke Admin</button>
+                                    } else {
+                                        <button class="btn btn-success btn-sm" type="button" @onclick="async() => await PromoteAdmin(user.Id)">Promote Admin</button>
+                                    }
+                                   
+                                    <button class="btn btn-danger btn-sm" type="button" @onclick="async() => await RemoveUser(user.Id)"> <i class="fa-solid fa-trash pe2 "></i> Remove User</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+
+@code {
+
+    private List<ApplicationUser>? _users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _users = await UserRepository.GetUsers();
+        var currentUser = await UsernameRetriever.Identity;
+        
+        // Remove yourself because we do not care.
+        _users.RemoveAll(u => u.Id == currentUser);
+        
+        // Check who is and isn't admin
+        foreach (var user in _users)
+        {
+            if (await UserManager.IsInRoleAsync(user, Roles.ADMIN)) { user.IsAdmin = true; }
+        }
+    }
+
+
+    private async Task PromoteAdmin(string userId)
+    {
+        const string role = Roles.ADMIN;
+        var user = await UserManager.FindByIdAsync(userId);
+
+        if (user != null)
+        {
+            // Add to role
+            if (!await UserManager.IsInRoleAsync(user, role))
+            {
+                await UserManager.AddToRoleAsync(user, role);
+            }
+            _users!.Where(u => u.Id == user.Id).ToList().ForEach(u => u.IsAdmin = true);
+        }
+       
+    }
+
+    private async Task RevokeAdmin(string userId)
+    {
+        var user = await UserManager.FindByIdAsync(userId);
+        if (user != null)
+        {   
+            // Remove from role and make sure they're in the user role
+            await UserManager.RemoveFromRoleAsync(user, Roles.ADMIN);
+
+            if (!await UserManager.IsInRoleAsync(user, Roles.USER))
+            {
+                await UserManager.AddToRoleAsync(user, Roles.USER);
+            }
+            
+            _users!.Where(u => u.Id == user.Id).ToList().ForEach(u => u.IsAdmin = false);
+        }
+    }
+
+    private async Task RemoveUser(string userId)
+    {
+        var user = await UserManager.FindByIdAsync(userId);
+        if (user != null)
+        {
+            // Delete the user
+            await UserManager.DeleteAsync(user);
+            _users!.RemoveAll(u => u.Id == userId);
+        }
+    }
+
+}
