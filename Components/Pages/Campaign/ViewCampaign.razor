@@ -37,12 +37,13 @@ else
                 <div class="d-flex justify-content-center align-items-center">
                     <p class="text-secondary">You have no blogs made yet.</p>
                 </div>
-                <div class="d-flex justify-content-center align-items-center">
-                    <a class="btn btn-primary" href="blog/@CampaignId/new"> <i class="fa-solid fa-plus pe-2"></i> Create Blog </a>
-                </div>
+                @if (_userId == _campaign.owner_id)
+                {
+                    <div class="d-flex justify-content-center align-items-center">
+                        <a class="btn btn-primary" href="blog/@CampaignId/new"> <i class="fa-solid fa-plus pe-2"></i> Create Blog </a>
+                    </div>
 
-
-
+                }
             }
             else
             {
