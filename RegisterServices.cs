@@ -4,7 +4,7 @@ namespace LeviathanRipBlog;
 
 public static class RegisterServices {
     
-    public static void Configure(this IServiceCollection services) {
+    public static void ConfigureServices(this IServiceCollection services) {
         
         // Repositories
         services.AddTransient<ICampaignRepository, CampaignRepository>();
@@ -15,7 +15,5 @@ public static class RegisterServices {
         // Services
         services.AddTransient<IUsernameRetriever, UsernameRetriever>();
         services.AddSingleton<StatusMessageService>();
-        services.AddTransient<IDocumentStorage, FileDocumentStorage>();
-
     }
 }

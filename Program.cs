@@ -2,7 +2,9 @@ using LeviathanRipBlog;
 using LeviathanRipBlog.Components;
 using LeviathanRipBlog.Components.Account;
 using LeviathanRipBlog.Data;
+using LeviathanRipBlog.Data.Repositories;
 using LeviathanRipBlog.Middleware;
+using LeviathanRipBlog.Services;
 using LeviathanRipBlog.Settings;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -40,13 +42,25 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
     .AddDefaultTokenProviders();
 
 
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+var environment = builder.Environment;
 
-RegisterServices.Configure(services: builder.Services);
+// Register implementation depending on env
+if (environment.IsDevelopment())
+{
+    builder.Services.AddTransient<IDocumentStorage, FileDocumentStorage>();
+}
+else
+{
+    builder.Services.AddTransient<IDocumentStorage, SpacesDocumentStorage>();
+}
+
+ConfigureSettings(builder.Services, builder.Configuration);
+RegisterServices.ConfigureServices(services: builder.Services);
 
 var app = builder.Build();
 
 app.UseMiddleware<BlockIdentityPathMiddleware>();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -86,7 +100,9 @@ using (var scope = app.Services.CreateScope()) {
 app.Run();
 
 
-
+void ConfigureSettings(IServiceCollection services, IConfiguration config) {
+    services.Configure<S3Settings>(config.GetSection("Spaces"));
+}
 
 async Task CreateRoles(IServiceProvider serviceProvider) {
     //initializing custom roles 

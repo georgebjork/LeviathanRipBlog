@@ -3,14 +3,7 @@ using static System.String;
 
 namespace LeviathanRipBlog.Services;
 
-public interface IDocumentStorage
-{
-    Task<SavedDocumentResponse> SaveDocument(IBrowserFile file);
-    Task<(byte[], string)> RetrieveDocument(string filename);
-    Task<bool> RemoveFile(string documentIdentifier);
-    
-    
-}
+
 
 public class FileDocumentStorage(IConfiguration configuration, ILogger<FileDocumentStorage> logger) : IDocumentStorage
 {
