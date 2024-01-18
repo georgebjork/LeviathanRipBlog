@@ -41,7 +41,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
     .AddRoles<IdentityRole>()
     .AddDefaultTokenProviders();
 
-
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 var environment = builder.Environment;
 
 // Register implementation depending on env
