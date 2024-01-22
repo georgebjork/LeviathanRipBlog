@@ -47,10 +47,14 @@ var environment = builder.Environment;
 // Register implementation depending on env
 if (environment.IsDevelopment())
 {
+    Console.WriteLine("Dev build.");
     builder.Services.AddTransient<IDocumentStorage, FileDocumentStorage>();
+    //builder.Services.AddTransient<IDocumentStorage, SpacesDocumentStorage>();
+
 }
 else
 {
+    Console.WriteLine("Prod build.");
     builder.Services.AddTransient<IDocumentStorage, SpacesDocumentStorage>();
 }
 

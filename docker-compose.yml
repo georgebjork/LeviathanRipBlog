@@ -12,7 +12,7 @@ services:
     depends_on:
       - db
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DbConnection=User ID=postgres;Password=password;Host=db;Port=5432;Database=LeviathanRipBlog;Pooling=true;Connection Lifetime=0;
       - file_root_path=/c/storage/blog
     volumes:
