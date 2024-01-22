@@ -7,6 +7,7 @@
 @inject ICampaignRepository CampaignRepository
 @inject IBlogRepository BlogRepository
 
+<PageTitle>@(_campaign?.name ?? "Unknown") </PageTitle>
 
 @if (_campaign is null)
 {

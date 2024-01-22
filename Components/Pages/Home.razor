@@ -23,7 +23,7 @@
     }
     else
     {
-        if (_blogs.Count <= 0 && RecentBlog is null)
+        if ((_blogs.Count <= 0 && recentBlog is null) || _blogs is null)
         {
             <div class="d-flex justify-content-center align-items-center">
                 <p class="text-secondary">There are no blog posts yet.</p>
@@ -34,7 +34,7 @@
             @* Most recent blog *@
             <div class="col-lg-8">
                 <div>
-                    <BlogCard Blog="@RecentBlog"/>
+                    <BlogCard Blog="@recentBlog"/>
                 </div>
                 
                 <div class="row">
@@ -54,9 +54,9 @@
    
 @code {
 
-    private List<blog>? _blogs = new();
-    
-    private blog? RecentBlog { get; set; } = new();
+    private List<blog>? _blogs;
+
+    private blog? recentBlog;
     
 
     protected override async Task OnInitializedAsync()
@@ -65,8 +65,8 @@
 
         if (_blogs is null) return;
 
-        RecentBlog = _blogs.FirstOrDefault();
-        _blogs.Remove(RecentBlog!);
+        recentBlog = _blogs.FirstOrDefault();
+        _blogs.Remove(recentBlog!);
     }
 
 }

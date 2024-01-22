@@ -6,27 +6,12 @@
 @inject ILogger<CreateCampaign> Logger
 @inject ICampaignRepository CampaignRepository
 
-<EditForm method="post" Model="Model" OnValidSubmit="Submit"  FormName="campaign-form">
-    <AntiforgeryToken />
+<PageTitle>Create Campaign</PageTitle>
 
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-    
-    <div class="pb-5">
-        <label for="name">Campaign Name:</label>
-        <InputText id="name" @bind-Value="Model!.Name" class="form-control"></InputText>
-    </div>
-    
-    <div class="pb-5">
-        <label for="description">A brief description of the campaign:</label>
-        <InputTextArea id="description" @bind-Value="Model!.Description" class="form-control"></InputTextArea>
-    </div>
-    
-    <div class="d-grid gap-2">
-        <button type="submit" class="btn btn-primary">Create</button>
-    </div>
-    
-</EditForm>
+
+<CampaignFormComponent Model="Model" SubmitCallBack="Submit" />
+
+
 
 
 @code {
