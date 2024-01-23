@@ -27,7 +27,9 @@
             }
         </div>
         <div class="card-body">
-            <h2 class="card-title h4">@Blog.title</h2>
+            <h2 class="card-title h4">
+                @(TitleLength.HasValue ? Blog.title.Truncate(TitleLength.Value) : Blog.title)
+            </h2>
             
             <div class="small text-muted">@Blog.publish_date.ConvertUtcToFormattedDate() | @Blog.created_by</div>
             @if (Blog.campaign_name is not null)
@@ -58,6 +60,9 @@
     
     [Parameter]
     public bool IsOwner { get; set; }
+    
+    [Parameter]
+    public int? TitleLength { get; set; }
     
     private string? blogDocument;
     private string? imageSrc;

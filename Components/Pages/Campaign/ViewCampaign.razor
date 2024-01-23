@@ -63,14 +63,14 @@
                     <div class="row">
                         @foreach (var blog in _blogs)
                         {
-                            <div class="col-lg-4">
+                            <div class="col-xl-4 col-lg-6">
                                 @if (_userId == _campaign.owner_id)
                                 {
-                                    <BlogCard Blog="@blog" IsOwner="true"/>
+                                    <BlogCard Blog="@blog" IsOwner="true" TitleLength="30"/>
                                 }
                                 else
                                 {
-                                    <BlogCard Blog="@blog"/>
+                                    <BlogCard Blog="@blog" TitleLength="30"/>
                                 }
                             </div>
                         
