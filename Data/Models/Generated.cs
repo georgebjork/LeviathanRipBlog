@@ -18,6 +18,9 @@ public class blog
     public DateTime created_on { get; set; } 
     public string updated_by { get; set; } = "";
     public DateTime updated_on { get; set; }
+
+    [Computed]
+    public string? campaign_name { get; set; }
 }
 
 [Table("campaign")]

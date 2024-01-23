@@ -33,7 +33,11 @@ public class BlogRepository : BasePgRepository, IBlogRepository {
 
     public async Task<List<blog>> GetRecentBlogs(int numBlogs)
     {
-        var sql = @"SELECT * FROM blog WHERE is_deleted = false ORDER BY id DESC LIMIT @num";
+        var sql = @"SELECT blog.*, campaign.name AS ""campaign_name""
+                    FROM blog
+                    INNER JOIN campaign ON (blog.campaign_id = campaign.id)
+                    WHERE blog.is_deleted = false ORDER BY blog.id DESC LIMIT 5";
+        
         await using var conn = await GetNewOpenConnection();
         var rv = await conn.QueryAsync<blog>(sql, new {num = numBlogs});
         return rv.ToList();

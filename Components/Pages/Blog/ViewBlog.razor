@@ -11,7 +11,7 @@
 @using LeviathanRipBlog.Helpers
 @using LeviathanRipBlog.Data.Models
 
-<PageTitle> View Blog </PageTitle>
+<PageTitle>@(_blog?.title ?? "Loading...") </PageTitle>
 
 <div>
     <article>
@@ -21,13 +21,18 @@
         }
         else
         {
-            @if (!_isImageLoading && _imageSrc is not null)
+            <div class="d-flex justify-content-end">
+                <a class="btn btn-link" href="/campaign/@_blog.campaign_id"> Back to Campaign </a>
+            </div>
+            @if (!isImageLoading && imageSrc is not null)
             {
-                <figure class="mb-4">
-                    <img class="img-fluid rounded" src="@_imageSrc" alt="Loaded image"/>
-                </figure>
+                <div class="w-100 text-center">
+                    <figure class="mb-4">
+                        <img class="img-fluid rounded" src="@imageSrc" alt="Loaded image" style="height: 500px; object-fit: contain"/>
+                    </figure>
+                </div>
             }
-            else if (_isImageLoading)
+            else if (isImageLoading)
             {
                 <div>
                     <LoadingSpinner />
@@ -41,9 +46,18 @@
             <!-- Post meta content-->
             <div class="text-muted fst-italic mb-2">Posted on: @_blog.publish_date.ConvertUtcToFormattedDate() by @_blog.created_by</div>
 
-            <div class="text-muted fst-italic mb-2">Campaign: @_campaign!.name</div>
-
-            <div class="text-muted fst-italic mb-2">Session on: @_blog.session_date.ConvertUtcToFormattedDate()</div>
+            <div class="text-muted fst-italic mb-2">Campaign:  <a href="/campaign/@_campaign!.id">@_campaign!.name</a></div>
+            
+            <div class="d-flex justify-content-between">
+                <div class="text-muted fst-italic">Session on: @_blog.session_date.ConvertUtcToFormattedDate()</div>
+                
+                @if (userId == _blog.owner_id)
+                {
+                    <div>                    
+                        <a class="btn btn-secondary" href="campaign/@_blog.campaign_id/blog/@_blog.id/edit">Edit  <i class="fa-solid fa-pen-to-square ps-2"></i> </a>
+                    </div>
+                }
+            </div>
 
             <hr/>
 
@@ -61,18 +75,22 @@
     [Parameter]
     public long CampaignId { get; set; }
     
-    private blog? _blog = new();
-    private campaign? _campaign = new();
-    private string? _blogDocument;
+    private blog? _blog;
+    private campaign? _campaign;
+    private string? blogDocument;
 
-    private string? _imageSrc;
+    private string? imageSrc;
 
-    private bool _isImageLoading = true; // Flag to indicate image loading status
+    private bool isImageLoading = true; // Flag to indicate image loading status
+
+    private string? userId;  
 
     protected override async Task OnInitializedAsync()
     {
         _blog = await BlogRepository.GetBlog(BlogId);
         _campaign = await CampaignRepository.GetCampaignById(_blog.campaign_id);
+
+        userId = await UsernameRetriever.Identity ?? "unknown";
         
         if(_blog is null || _campaign is null) NavigationManager.NavigateTo("/");
         
@@ -84,20 +102,20 @@
     {
         try
         {
-            _blogDocument = await DocumentRepository.GetDocumentIdentifierByBlogId(_blog!.id);
+            blogDocument = await DocumentRepository.GetDocumentIdentifierByBlogId(_blog!.id);
             
-            if (_blogDocument is not null)
+            if (blogDocument is not null)
             {
-                var (imageData, mimeType) = await FileDocumentStorage.RetrieveDocument(_blogDocument);
+                var (imageData, mimeType) = await FileDocumentStorage.RetrieveDocument(blogDocument);
                 if (imageData.Length > 0)
                 {
-                    _imageSrc = $"data:{mimeType};base64," + Convert.ToBase64String(imageData);
+                    imageSrc = $"data:{mimeType};base64," + Convert.ToBase64String(imageData);
                 }
             }
         }
         finally
         {
-            _isImageLoading = false;
+            isImageLoading = false;
             StateHasChanged(); // Trigger UI update
         }
     }

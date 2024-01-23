@@ -9,78 +9,82 @@
 
 <PageTitle>@(_campaign?.name ?? "Unknown") </PageTitle>
 
-@if (_campaign is null)
-{
-    <LoadingSpinner />
-}
-else
-{
+<div>
 
-    <div class="jumbotron jumbotron-fluid">
-        <div class="container">
-            <h1 class="display-4">@_campaign.name</h1>
-            <div class="lead fs-5" style="white-space: pre-wrap;">@_campaign.description</div>
-            <hr class="my-4">
+    @if (_campaign is null)
+    {
+        <LoadingSpinner />
+    }
+    else
+    {
+
+        <div class="jumbotron jumbotron-fluid">
+            <div>
+                <h1 class="display-4">@_campaign.name</h1>
+                <div class="lead fs-5" style="white-space: pre-wrap;">@_campaign.description</div>
+                <hr class="my-4">
+            </div>
         </div>
-    </div>
 
 
-    <div class="row">
+        <div>
 
-        @if (_blogs is null)
-        {
-            <LoadingSpinner/>
-        }
-        else
-        {
-            @if (_blogs.Count <= 0)
+            @if (_blogs is null)
             {
-                <div class="d-flex justify-content-center align-items-center">
-                    <p class="text-secondary">You have no blogs made yet.</p>
-                </div>
-                @if (_userId == _campaign.owner_id)
-                {
-                    <div class="d-flex justify-content-center align-items-center">
-                        <a class="btn btn-primary" href="blog/@CampaignId/new"> <i class="fa-solid fa-plus pe-2"></i> Create Blog </a>
-                    </div>
-
-                }
+                <LoadingSpinner/>
             }
             else
             {
-                <AuthorizeView>
-                    <Authorized>
-                        @if (_userId == _campaign.owner_id)
-                        {
-                            <div class="d-flex justify-content-end align-items-center pb-3">
-                                <a class="btn btn-primary" href="blog/@CampaignId/new"> <i class="fa-solid fa-plus pe-2"></i> Create Blog </a>
-                            </div>
-                        }
-                    </Authorized>
-                </AuthorizeView>
-                <div class="row">
-                    @foreach (var blog in _blogs)
+                @if (_blogs.Count <= 0)
+                {
+                    <div class="d-flex justify-content-center align-items-center">
+                        <p class="text-secondary">You have no blogs made yet.</p>
+                    </div>
+                    @if (_userId == _campaign.owner_id)
                     {
-                        <div class="col-lg-4">
+                        <div class="d-flex justify-content-center align-items-center">
+                            <a class="btn btn-primary" href="blog/@CampaignId/new"> <i class="fa-solid fa-plus pe-2"></i> Create Blog </a>
+                        </div>
+
+                    }
+                }
+                else
+                {
+                    <AuthorizeView>
+                        <Authorized>
                             @if (_userId == _campaign.owner_id)
                             {
-                                <BlogCard Blog="@blog" IsOwner="true"/>
+                                <div class="d-flex justify-content-end align-items-center pb-3 ">
+                                    <a class="btn btn-primary" href="blog/@CampaignId/new"> <i class="fa-solid fa-plus pe-2"></i> Create Blog </a>
+                                </div>
                             }
-                            else
-                            {
-                                <BlogCard Blog="@blog"/>
-                            }
-                        </div>
+                        </Authorized>
+                    </AuthorizeView>
+                    <div class="row">
+                        @foreach (var blog in _blogs)
+                        {
+                            <div class="col-lg-4">
+                                @if (_userId == _campaign.owner_id)
+                                {
+                                    <BlogCard Blog="@blog" IsOwner="true"/>
+                                }
+                                else
+                                {
+                                    <BlogCard Blog="@blog"/>
+                                }
+                            </div>
                         
                         
-                    }
-                </div>
+                        }
+                    </div>
+                }
             }
-        }
-    </div>
+        </div>
 
-}
+    }
 
+    
+</div>
 
 
 @code {

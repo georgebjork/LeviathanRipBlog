@@ -3,19 +3,20 @@
 
 <EditForm method="post" Model="Model" OnValidSubmit="SubmitCallBack"  FormName="campaign-form">
     <AntiforgeryToken />
-
     <DataAnnotationsValidator />
     
-    <div class="form-floating mb-3 mt-3">
-        <InputText id="name" @bind-Value="Model!.Name" class="form-control" aria-required="true" placeholder="Campaign Name"></InputText>
-        <label for="name">Campaign Name</label>
-        <ValidationMessage For="() => Model!.Name" class="text-danger" />
+    <div class="row pb-3 pt-3">
+        <div class="col-lg-12">
+            <InputText id="name" @bind-Value="Model!.Name" class="form-control" aria-required="true" placeholder="Campaign Name"></InputText>
+            <ValidationMessage For="() => Model!.Name" class="text-danger"/>
+        </div>
     </div>
     
-    <div class="form-floating mb-3">
-        <InputTextArea id="description" @bind-Value="Model!.Description" class="form-control" aria-required="true" placeholder=""  rows="15"></InputTextArea>
-        <label for="description">Campaign Description</label>
-        <ValidationMessage For="() => Model.Description" class="text-danger"/>
+    <div class="row">
+        <div class="pb-3">
+            <InputTextArea id="description" @bind-Value="Model!.Description" class="form-control" placeholder="A brief campaign description goes here." rows="5"></InputTextArea>
+            <ValidationMessage For="() => Model.Description" class="text-danger"/>
+        </div>
     </div>
     
     <div class="d-grid gap-2">

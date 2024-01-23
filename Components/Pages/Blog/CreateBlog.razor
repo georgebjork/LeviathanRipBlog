@@ -16,23 +16,24 @@
 
 <EditForm method="post" Model="Model" OnValidSubmit="Submit"  FormName="campaign-form">
     <AntiforgeryToken />
-
     <DataAnnotationsValidator />
-    <ValidationSummary />
     
    <div class="row pb-3 pt-3">
        <div class="col-lg-8 col-sm-12 pb-3">
            <InputText id="title" @bind-Value="Model!.Title" class="form-control" placeholder="Title"></InputText>
+           <ValidationMessage For="() => Model!.Title" class="text-danger"/>
        </div>
    
        <div class="col-lg-4 col-sm-12 pb-3">
-            <InputDate class="form-control" @bind-Value="@Model.SessionDate" />
+           <InputDate class="form-control" @bind-Value="@Model.SessionDate" placeholder="Session Date" />
+           <ValidationMessage For="() => Model!.SessionDate" class="text-danger"/>
        </div>
    </div>
 
     <div class="row">
         <div class="pb-3">
             <InputTextArea id="description" @bind-Value="Model!.Content" class="form-control" placeholder="Your blog content goes here." rows="15"></InputTextArea>
+            <ValidationMessage For="() => Model!.Content" class="text-danger"/>
         </div>
     </div>
     

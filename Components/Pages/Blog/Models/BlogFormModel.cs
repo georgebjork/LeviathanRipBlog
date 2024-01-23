@@ -35,6 +35,7 @@ public class BlogFormModel {
             session_date = SessionDate!.Value,
             is_draft = false,
             is_deleted = false,
+            owner_id = UserId,
             created_by = Username,
             created_on = DateTime.UtcNow,
             updated_by = Username,
