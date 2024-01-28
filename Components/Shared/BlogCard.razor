@@ -7,51 +7,46 @@
 @inject IDocumentStorage FileDocumentStorage
 
 
-@if (Blog is not null)
-{
-    <div class="card mb-4">
-        <div href="#">
-            @if (isImageLoading)
-            {
-                <div class="text-center"  style="height: 300px;">
-                    <div class="spinner-border card-img-top" role="status" >
-                        <span class="sr-only">Loading...</span>
-                    </div>
+<div class="card mb-4">
+    <div href="#">
+        @if (_imgId is not null)
+        {
+            <img class="card-img-top pt-3" alt="@_imgId" src="api/img/@_imgId" style="height: 300px; object-fit: contain"/>
+        }
+        else
+        {
+            <div class="text-center"  style="height: 300px;">
+                <div class="spinner-border card-img-top" role="status" >
+                    <span class="sr-only">Loading...</span>
                 </div>
-            }
-            else
-            {
-                <div class="text-center">
-                    <img class="card-img-top pt-3" alt="@blogDocument" src="@imageSrc" style="height: 300px; object-fit: contain" />
-                </div>
-            }
-        </div>
-        <div class="card-body">
-            <h2 class="card-title h4">
-                @(TitleLength.HasValue ? Blog.title.Truncate(TitleLength.Value) : Blog.title)
-            </h2>
-            
-            <div class="small text-muted">@Blog.publish_date.ConvertUtcToFormattedDate() | @Blog.created_by</div>
-            @if (Blog.campaign_name is not null)
-            {
-                <div class="small text-muted">
-                    <a href="/campaign/@Blog.campaign_id">@Blog.campaign_name</a>
-                </div>
-                
-            }
-            <p class="card-text mt-3">@Blog.blog_content.Truncate(50)</p>
-        
-            <div class="d-flex justify-content-between">
-                <a class="btn btn-primary" href="campaign/@Blog.campaign_id/blog/@Blog.id">Read more <i class="fa-solid fa-arrow-right ps-2"></i> </a>
-                @if (IsOwner)
-                {
-                    <a class="btn btn-secondary" href="campaign/@Blog.campaign_id/blog/@Blog.id/edit">Edit  <i class="fa-solid fa-pen-to-square ps-2"></i> </a>
-                }
             </div>
-        
-        </div>
+        }
     </div>
-}
+    <div class="card-body">
+        <h2 class="card-title h4">
+            @(TitleLength.HasValue ? Blog.title.Truncate(TitleLength.Value) : Blog.title)
+        </h2>
+            
+        <div class="small text-muted">@Blog.publish_date.ConvertUtcToFormattedDate() | @Blog.created_by</div>
+        @if (Blog.campaign_name is not null)
+        {
+            <div class="small text-muted">
+                <a href="/campaign/@Blog.campaign_id">@Blog.campaign_name</a>
+            </div>
+                
+        }
+        <p class="card-text mt-3">@Blog.blog_content.Truncate(50)</p>
+        
+        <div class="d-flex justify-content-between">
+            <a class="btn btn-primary" href="campaign/@Blog.campaign_id/blog/@Blog.id">Read more <i class="fa-solid fa-arrow-right ps-2"></i> </a>
+            @if (IsOwner)
+            {
+                <a class="btn btn-secondary" href="campaign/@Blog.campaign_id/blog/@Blog.id/edit">Edit  <i class="fa-solid fa-pen-to-square ps-2"></i> </a>
+            }
+        </div>
+        
+    </div>
+</div>
 
 
 @code {
@@ -63,35 +58,12 @@
     
     [Parameter]
     public int? TitleLength { get; set; }
-    
-    private string? blogDocument;
-    private string? imageSrc;
-    private bool isImageLoading = true; // Flag to indicate image loading status
+
+    private string? _imgId;
+    private string? _imageBase64;
 
     protected override async Task OnInitializedAsync()
     {
-        _ = LoadImageAsync();
-    }
-
-    private async Task LoadImageAsync()
-    {
-        try
-        {
-            blogDocument = await DocumentRepository.GetDocumentIdentifierByBlogId(Blog!.id);
-            
-            if (blogDocument is not null)
-            {
-                var (imageData, mimeType) = await FileDocumentStorage.RetrieveDocument(blogDocument);
-                if (imageData.Length > 0)
-                {
-                    imageSrc = $"data:{mimeType};base64," + Convert.ToBase64String(imageData);
-                }
-            }
-        }
-        finally
-        {
-            isImageLoading = false;
-            StateHasChanged(); // Trigger UI update
-        }
+        _imgId = await DocumentRepository.GetDocumentIdentifierByBlogId(Blog!.id);
     }
 }

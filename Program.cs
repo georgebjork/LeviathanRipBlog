@@ -1,4 +1,5 @@
 using LeviathanRipBlog;
+using LeviathanRipBlog.API;
 using LeviathanRipBlog.Components;
 using LeviathanRipBlog.Components.Account;
 using LeviathanRipBlog.Data;
@@ -15,6 +16,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddOutputCache();
+builder.Services.AddHttpClient();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
@@ -43,13 +47,14 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 var environment = builder.Environment;
+Console.WriteLine($"Current Environment: {environment.EnvironmentName}");
 
 // Register implementation depending on env
 if (environment.IsDevelopment())
 {
     Console.WriteLine("Dev build.");
-    builder.Services.AddTransient<IDocumentStorage, FileDocumentStorage>();
-    //builder.Services.AddTransient<IDocumentStorage, SpacesDocumentStorage>();
+    //builder.Services.AddTransient<IDocumentStorage, FileDocumentStorage>();
+    builder.Services.AddTransient<IDocumentStorage, SpacesDocumentStorage>();
 
 }
 else
@@ -64,7 +69,7 @@ RegisterServices.ConfigureServices(services: builder.Services);
 var app = builder.Build();
 
 app.UseMiddleware<BlockIdentityPathMiddleware>();
-
+app.UseOutputCache();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -95,6 +100,7 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
+ApiEndpoints.DefineEndpoints(app);
 
 using (var scope = app.Services.CreateScope()) {
     await CreateRoles(scope.ServiceProvider);
