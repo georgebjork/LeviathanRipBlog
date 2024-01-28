@@ -24,7 +24,7 @@ public static class ApiEndpoints
             }
 
             // Set the cache-control header
-            httpContext.Response.Headers.CacheControl = "public,max-age=600"; // 12 hours
+            httpContext.Response.Headers.CacheControl = "public,max-age=43200"; // 12 hours
 
             return Results.File(imageData, mimeType);
         })

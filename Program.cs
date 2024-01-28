@@ -53,8 +53,8 @@ Console.WriteLine($"Current Environment: {environment.EnvironmentName}");
 if (environment.IsDevelopment())
 {
     Console.WriteLine("Dev build.");
-    //builder.Services.AddTransient<IDocumentStorage, FileDocumentStorage>();
-    builder.Services.AddTransient<IDocumentStorage, SpacesDocumentStorage>();
+    builder.Services.AddTransient<IDocumentStorage, FileDocumentStorage>();
+    //builder.Services.AddTransient<IDocumentStorage, SpacesDocumentStorage>();
 
 }
 else
