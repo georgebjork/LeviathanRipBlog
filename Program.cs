@@ -10,6 +10,7 @@ using LeviathanRipBlog.Settings;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,18 +50,17 @@ builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSe
 var environment = builder.Environment;
 Console.WriteLine($"Current Environment: {environment.EnvironmentName}");
 
-// Register implementation depending on env
-if (environment.IsDevelopment())
-{
-    Console.WriteLine("Dev build.");
-    builder.Services.AddTransient<IDocumentStorage, FileDocumentStorage>();
-    //builder.Services.AddTransient<IDocumentStorage, SpacesDocumentStorage>();
+// Register implementation depending on env vars. If we have a spaces url then register spaces storage, else use file storage 
 
+var spacesUrl = builder.Configuration.GetSection("Spaces")["SpacesUrl"];
+
+if (!spacesUrl.IsNullOrEmpty())
+{
+    builder.Services.AddTransient<IDocumentStorage, SpacesDocumentStorage>();
 }
 else
 {
-    Console.WriteLine("Prod build.");
-    builder.Services.AddTransient<IDocumentStorage, SpacesDocumentStorage>();
+    builder.Services.AddTransient<IDocumentStorage, FileDocumentStorage>();
 }
 
 ConfigureSettings(builder.Services, builder.Configuration);
