@@ -35,14 +35,14 @@
             @* Most recent blog *@
             <div class="col-lg-8">
                 <div>
-                    <BlogCard Blog="@recentBlog" TitleLength="70"/>
+                    <BlogCard Blog="@recentBlog" TitleLength="70" />
                 </div>
                 
                 <div class="row">
                     @foreach (var blog in _blogs)
                     {
                         <div class="col-lg-12 col-xl-6">
-                            <BlogCard Blog="@blog" TitleLength="30"/>
+                            <BlogCard Blog="@blog" TitleLength="30"  />
                         </div>
 
                     }

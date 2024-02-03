@@ -21,6 +21,9 @@ public class blog
 
     [Computed]
     public string? campaign_name { get; set; }
+
+    [Computed]
+    public string? document_identifier { get; set; }
 }
 
 [Table("campaign")]

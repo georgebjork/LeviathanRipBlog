@@ -19,7 +19,11 @@ public class BlogRepository : BasePgRepository, IBlogRepository {
 
 
     public async Task<List<blog>> GetCampaignBlogs(long campaignId) {
-        var sql = @"SELECT * FROM blog WHERE campaign_id = @campaignId AND is_deleted = false";
+        var sql = @"
+            SELECT b.*, bd.document_identifier 
+            FROM blog b
+            INNER JOIN blog_documents bd ON bd.blog_id = b.id 
+            WHERE b.campaign_id = @campaignId AND b.is_deleted = false";
         await using var conn = await GetNewOpenConnection();
         var rv = await conn.QueryAsync<blog>(sql, new {campaignId});
         return rv.ToList();
@@ -33,10 +37,12 @@ public class BlogRepository : BasePgRepository, IBlogRepository {
 
     public async Task<List<blog>> GetRecentBlogs(int numBlogs)
     {
-        var sql = @"SELECT blog.*, campaign.name AS ""campaign_name""
-                    FROM blog
-                    INNER JOIN campaign ON (blog.campaign_id = campaign.id)
-                    WHERE blog.is_deleted = false ORDER BY blog.id DESC LIMIT 5";
+        var sql = @"
+            SELECT b.*, bd.document_identifier, c.name AS ""campaign_name""
+            FROM blog b
+            INNER JOIN blog_documents bd ON bd.blog_id = b.id 
+            INNER JOIN campaign c ON (b.campaign_id = c.id)
+            WHERE b.is_deleted = false ORDER BY b.id DESC LIMIT 5";
         
         await using var conn = await GetNewOpenConnection();
         var rv = await conn.QueryAsync<blog>(sql, new {num = numBlogs});

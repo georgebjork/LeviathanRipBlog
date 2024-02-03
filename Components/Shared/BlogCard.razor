@@ -9,18 +9,7 @@
 
 <div class="card mb-4">
     <div href="#">
-        @if (_imgId is not null)
-        {
-            <img class="card-img-top pt-3" alt="@_imgId" src="api/img/@_imgId" style="height: 300px; object-fit: contain"/>
-        }
-        else
-        {
-            <div class="text-center"  style="height: 300px;">
-                <div class="spinner-border card-img-top" role="status" >
-                    <span class="sr-only">Loading...</span>
-                </div>
-            </div>
-        }
+        <img class="card-img-top pt-3" alt="@Blog.document_identifier" src="api/img/@Blog.document_identifier" style="height: 300px; object-fit: contain"/>
     </div>
     <div class="card-body">
         <h2 class="card-title h4">
@@ -58,12 +47,4 @@
     
     [Parameter]
     public int? TitleLength { get; set; }
-
-    private string? _imgId;
-    private string? _imageBase64;
-
-    protected override async Task OnInitializedAsync()
-    {
-        _imgId = await DocumentRepository.GetDocumentIdentifierByBlogId(Blog!.id);
-    }
 }
