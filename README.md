@@ -1,4 +1,6 @@
-# LeviathanRipBlog
+# LeviathanRipBlog  
+
+[![Build and publish](https://github.com/georgebjork/LeviathanRipBlog/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/georgebjork/LeviathanRipBlog/actions/workflows/main.yml)
 
 https://leviathanripshowdown.rodeo/
 
