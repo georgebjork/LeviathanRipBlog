@@ -21,7 +21,7 @@ jobs:
         run: doctl registry login --expiry-seconds 600
       - name: Tag image 
         run:
-          docker tag sample/my-page \
+          docker tag leviathanrip/leviathan-rip-blog \
           registry.digitalocean.com/leviathanrip/leviathan-rip-blog:latest
       - name: Push image to DO Container Registry 
         run: docker push registry.digitalocean.com/leviathanrip/leviathan-rip-blog:latest
