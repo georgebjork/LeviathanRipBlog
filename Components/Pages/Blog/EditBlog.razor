@@ -5,87 +5,95 @@
 @using LeviathanRipBlog.Data.Repositories
 @using LeviathanRipBlog.Components.Pages.Blog.Models
 @using LeviathanRipBlog.Data.Models
-@using LeviathanRipBlog.Settings
-@using Microsoft.AspNetCore.Identity
 
 @inject ILogger<EditBlog> Logger
 @inject IBlogRepository BlogRepository
 @inject IDocumentStorage DocumentStorage;
 @inject IDocumentRepository DocumentRepository;
+@inject IIdentityService IdentityService;
 
 <PageTitle> Edit Blog </PageTitle>
 
-<div class="d-flex justify-content-between align-items-center">
-    <h1>Edit Blog</h1>
-    <button class="btn btn-danger" @onclick="Delete">Delete</button>
-</div>
 
-<EditForm method="post" Model="Model" OnValidSubmit="Submit"  FormName="campaign-form">
-    <AntiforgeryToken />
+@if (IsValidUser is not null or true)
+{ 
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>Edit Blog</h1>
+        <button class="btn btn-danger" @onclick="Delete">Delete</button>
+    </div>
+        
+    <EditForm method="post" Model="Model" OnValidSubmit="Submit"  FormName="campaign-form">
+        <AntiforgeryToken />
 
-    <DataAnnotationsValidator />
-    <ValidationSummary />
-    
-   <div class="row pb-3 pt-3">
-       <div class="col-lg-8 col-sm-12 pb-3">
-           <InputText id="title" @bind-Value="Model!.Title" class="form-control" placeholder="Title"></InputText>
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        
+       <div class="row pb-3 pt-3">
+           <div class="col-lg-8 col-sm-12 pb-3">
+               <InputText id="title" @bind-Value="Model!.Title" class="form-control" placeholder="Title"></InputText>
+           </div>
+       
+          <div class="col-lg-4 col-sm-12 pb-3">
+                 <InputDate class="form-control" @bind-Value="@Model.SessionDate" />
+         </div>
        </div>
-   
-      <div class="col-lg-4 col-sm-12 pb-3">
-             <InputDate class="form-control" @bind-Value="@Model.SessionDate" />
-     </div>
-   </div>
 
-    <div class="row">
-        <div class="pb-3">
-            <InputTextArea id="description" @bind-Value="Model!.Content" class="form-control" placeholder="Your blog content goes here." rows="15"></InputTextArea>
+        <div class="row">
+            <div class="pb-3">
+                <InputTextArea id="description" @bind-Value="Model!.Content" class="form-control" placeholder="Your blog content goes here." rows="15"></InputTextArea>
+            </div>
         </div>
-    </div>
-    
-    <div class="row">
-            @if (_errors.Count > 0)
-            {
-                <div>
-                    <ul class="text-danger">
-                        @foreach (var error in _errors)
-                        {
-                            <li>@error</li>
-                        }
-                    </ul>
-                </div>
-            }
-            
-            @if (!_isDocumentDeleted && _uploadedFile is not null)
-            {
-                <div>
-                    <ul class="list-group pb-3">
-                        <li class="list-group-item d-flex justify-content-between">
-                            <div>
-                                <i class="fa-solid fa-image pe-2"></i> @_uploadedFile!.document_name
-                            </div>
-                            <button class="btn btn-danger btn-sm" type="button" @onclick="RemoveUploadedFile"> Delete File <i class="fa-regular fa-trash-can ps-2"></i> </button>
-                        </li>
-                    </ul>
-                    <div class="pb-3">
-                        <InputFile class="form-control" multiple disabled/>
+        
+        <div class="row">
+                @if (_errors.Count > 0)
+                {
+                    <div>
+                        <ul class="text-danger">
+                            @foreach (var error in _errors)
+                            {
+                                <li>@error</li>
+                            }
+                        </ul>
                     </div>
-                                
-                </div>
-               
-            }
-            else
-            {
-                <div class="pb-3">
-                    <InputFile class="form-control" OnChange="@LoadFiles" multiple/>
-                </div>
-            }
+                }
+                
+                @if (!_isDocumentDeleted && _uploadedFile is not null)
+                {
+                    <div>
+                        <ul class="list-group pb-3">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <div>
+                                    <i class="fa-solid fa-image pe-2"></i> @_uploadedFile!.document_name
+                                </div>
+                                <button class="btn btn-danger btn-sm" type="button" @onclick="RemoveUploadedFile"> Delete File <i class="fa-regular fa-trash-can ps-2"></i> </button>
+                            </li>
+                        </ul>
+                        <div class="pb-3">
+                            <InputFile class="form-control" multiple disabled/>
+                        </div>
+                                    
+                    </div>
+                   
+                }
+                else
+                {
+                    <div class="pb-3">
+                        <InputFile class="form-control" OnChange="@LoadFiles" multiple/>
+                    </div>
+                }
+            </div>
+        
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary">Update</button>
         </div>
-    
-    <div class="d-grid gap-2">
-        <button type="submit" class="btn btn-primary">Update</button>
-    </div>
-    
-</EditForm>
+        
+    </EditForm>
+}
+else
+{
+    <LoadingSpinner />
+}
+
 
 @code {
     [Parameter]
@@ -98,6 +106,8 @@
     public BlogFormModel? Model { get; set; } = new();
     
     private blog _blog = new();
+
+    public bool? IsValidUser;
     
     // Max amount of files and errors from upload
     private const int MaxAllowedFiles = 1;
@@ -110,30 +120,39 @@
     
     protected override async Task OnInitializedAsync() {
         
+        // Get logged in user info
         var email = await UsernameRetriever.Username;
         var id = await UsernameRetriever.Identity;
         
-        var user = await UserManager.FindByIdAsync(id);
-        if(user is null) NavigationManager.NavigateTo("/401");
+        // Unauthorized
+        if (id is null)
+        {
+            NavigationManager.NavigateTo("/401");
+            return;
+        }
+        
+        // Get blog
+        var blog = await BlogRepository.GetBlog(BlogId);
+        var isValid = await IdentityService.CanEditBlog(id!, blog);
+        
+        if (!isValid)
+        {
+            Logger.LogWarning("User {email} tried to edit blog id: {blogId} that they dont have access to.", email, BlogId);
+            NavigationManager.NavigateTo("/401");
+            return;
+        }
 
-        Model!.Username = email!; 
+        Model!.Username = email;
         Model!.UserId = id!;
         Model!.CampaignId = CampaignId;
 
-        var isAdmin = await UserManager.IsInRoleAsync(user!, Roles.ADMIN);
-
-        var blog = await BlogRepository.GetBlog(BlogId);
-        
-        if (Model.UserId != blog.owner_id || !isAdmin)
-        {
-            NavigationManager.NavigateTo("/401");
-        }
-        
         _blog = blog!;
         Model = Model.ToFormModel(_blog);
 
         _uploadedFile = await DocumentRepository.GetDocumentByBlogId(BlogId);
         if (_uploadedFile is null) _isDocumentDeleted = true;
+
+        IsValidUser = isValid;
     }
 
     private async Task Submit() {

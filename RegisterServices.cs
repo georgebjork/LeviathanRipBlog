@@ -15,5 +15,6 @@ public static class RegisterServices {
         // Services
         services.AddTransient<IUsernameRetriever, UsernameRetriever>();
         services.AddSingleton<StatusMessageService>();
+        services.AddTransient<IIdentityService, IdentityService>();
     }
 }
