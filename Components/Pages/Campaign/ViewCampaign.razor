@@ -1,4 +1,4 @@
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 @page "/campaign/{CampaignId:long}"
 @using LeviathanRipBlog.Data.Repositories
 @using LeviathanRipBlog.Data.Models
@@ -119,6 +119,7 @@
     private async Task GetBlogs()
     {
         _blogs = await BlogRepository.GetCampaignBlogs(CampaignId);
+        _blogs = _blogs.OrderByDescending(x => x.session_date).ToList();
     }
 
 }

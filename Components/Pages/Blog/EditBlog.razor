@@ -1,10 +1,12 @@
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender:false))
 
 @page "/campaign/{CampaignId:long}/blog/{BlogId:long}/edit"
 
 @using LeviathanRipBlog.Data.Repositories
 @using LeviathanRipBlog.Components.Pages.Blog.Models
 @using LeviathanRipBlog.Data.Models
+@using LeviathanRipBlog.Settings
+@using Microsoft.AspNetCore.Identity
 
 @inject ILogger<EditBlog> Logger
 @inject IBlogRepository BlogRepository
@@ -107,11 +109,26 @@
     
     
     protected override async Task OnInitializedAsync() {
-        Model!.Username = await UsernameRetriever.Username;   
-        Model!.UserId = (await UsernameRetriever.Identity)!;
-        Model!.CampaignId = CampaignId;
         
+        var email = await UsernameRetriever.Username;
+        var id = await UsernameRetriever.Identity;
+        
+        var user = await UserManager.FindByIdAsync(id);
+        if(user is null) NavigationManager.NavigateTo("/401");
+
+        Model!.Username = email!; 
+        Model!.UserId = id!;
+        Model!.CampaignId = CampaignId;
+
+        var isAdmin = await UserManager.IsInRoleAsync(user!, Roles.ADMIN);
+
         var blog = await BlogRepository.GetBlog(BlogId);
+        
+        if (Model.UserId != blog.owner_id || !isAdmin)
+        {
+            NavigationManager.NavigateTo("/401");
+        }
+        
         _blog = blog!;
         Model = Model.ToFormModel(_blog);
 
