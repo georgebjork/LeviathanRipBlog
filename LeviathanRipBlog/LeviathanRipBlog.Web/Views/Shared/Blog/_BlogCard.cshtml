@@ -1,0 +1,32 @@
+@using Humanizer
+@using LeviathanRipBlog.Helpers
+@model LeviathanRipBlog.Web.Models.QueryModels.Blog.BlogQueryModel
+
+
+<div class="card mb-4">
+    <div >
+        <img class="card-img-top pt-3" alt="@Model.document_identifier" src="/api/img/@Model.document_identifier" style="height: 300px; object-fit: contain"/>
+    </div>
+    <div class="card-body">
+        <h2 class="card-title h4">
+            @Model.title
+        </h2>
+            
+        <div class="small text-muted">@Model.publish_date.ConvertUtcToFormattedDate() | @Model.created_by</div>
+        <div class="small text-muted">
+            <a asp-controller="Campaign" asp-action="ViewCampaign" asp-route-CampaignId="@Model.campaign_id">@Model.campaign_name</a>
+        </div>
+        
+        <p class="card-text mt-3">@Model.blog_content.Truncate(50)</p>
+        
+        <div class="d-flex justify-content-between">
+            <a class="btn btn-primary" asp-controller="Blog" asp-action="ViewBlog" asp-route-CampaignId="@Model.campaign_id" asp-route-BlogId="@Model.id">
+                Read more <i class="fa-solid fa-arrow-right ps-2"></i>
+            </a>
+            @*@if (IsOwner)
+            {
+                <a class="btn btn-secondary" href="campaign/@Model.campaign_id/blog/@Model.id/edit">Edit  <i class="fa-solid fa-pen-to-square ps-2"></i> </a>
+            }*@
+        </div>
+    </div>
+</div>

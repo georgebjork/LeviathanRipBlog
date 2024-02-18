@@ -1,0 +1,57 @@
+@model LeviathanRipBlog.Web.Models.Campaign.ViewModels.CampaignViewModel
+
+@{
+    ViewData["Title"] = Model.Campaign.name;
+}
+
+<div>
+    <div class="jumbotron jumbotron-fluid pb-3">
+        <div>
+            <h1 class="display-4">@Model.Campaign.name</h1>
+            
+            <div class="d-flex justify-content-between">
+                <div class="lead fs-5" style="white-space: pre-wrap;">@Model.Campaign.description</div>
+                @if (ViewBag.IsUserAuthorized) {
+                     <div class="row">
+                         <div class="d-flex justify-content-end align-items-center">
+                             <a class="btn btn-primary me-2" asp-controller="Blog" asp-action="CreateBlog" asp-route-CampaignId="@Model.Campaign.id">
+                                 <i class="fa-solid fa-plus pe-2"></i> Create Blog
+                             </a>
+                             
+                             <a class="btn btn-secondary" asp-controller="Campaign" asp-action="EditCampaign" asp-route-CampaignId="@Model.Campaign.id">
+                                 <i class="fa-solid fa-pen-to-square pe-2"></i> Edit Campaign
+                             </a>
+                         </div>
+                     </div>
+                 }
+            </div>
+            <hr class="my-4">
+        </div>
+    </div>
+    
+    @if (Model.Blogs.Count <= 0)
+    {
+        <div class="d-flex justify-content-center align-items-center">
+            <p class="text-secondary">There are no blogs made yet.</p>
+        </div>
+        
+        if (ViewBag.IsUserAuthorized)
+        {
+            <div class="d-flex justify-content-center align-items-center">
+                <a class="btn btn-primary" asp-controller="Blog" asp-action="CreateBlog" asp-route-CampaignId="@Model.Campaign.id"> <i class="fa-solid fa-plus pe-2"></i> Create Blog </a>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var blog in Model.Blogs)
+            {
+                <div class="col-xl-4 col-lg-6">
+                    @await Html.PartialAsync("Blog/_BlogCard", blog)
+                </div>
+            }
+        </div>
+    }
+    
+</div>

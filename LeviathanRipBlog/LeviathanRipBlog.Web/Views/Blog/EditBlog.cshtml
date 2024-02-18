@@ -1,0 +1,34 @@
+@model LeviathanRipBlog.Web.Models.Blog.FormModels.BlogFormModel
+
+@{
+    ViewData["Title"] = "Create Blog";
+}
+
+<div class="row pt-3">
+    <h1>
+        Edit Blog
+    </h1>
+</div>
+
+<div class="row pt-1">
+    <div class="col-12">
+        <hr />
+    </div>
+</div>
+
+
+
+<form method="post" asp-action="EditBlog" asp-controller="Blog" enctype="multipart/form-data">
+    
+    @await Html.PartialAsync("Shared/_BlogForm")
+    
+    <div id="image-upload">
+        @await Html.PartialAsync("Shared/_BlogImageUpload")
+    </div>
+    
+    <div class="col-12">
+        <button class="btn btn-primary w-100" type="submit">
+            Create Blog
+        </button>
+    </div>
+</form>

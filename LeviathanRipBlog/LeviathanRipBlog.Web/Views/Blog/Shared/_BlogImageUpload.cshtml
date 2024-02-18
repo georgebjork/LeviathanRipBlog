@@ -1,0 +1,36 @@
+@using Microsoft.IdentityModel.Tokens
+@model LeviathanRipBlog.Web.Models.Blog.FormModels.BlogFormModel
+
+<div class="row pb-3">
+    @if (!Model.DocumentIdentifier.IsNullOrEmpty())
+    {
+        <div>
+            <ul class="list-group pb-3">
+                <li class="list-group-item d-flex justify-content-between">
+                    <div>
+                        <i class="fa-solid fa-image pe-2"></i> @Model.DocumentName
+                    </div>
+                    <button class="btn btn-danger btn-sm" type="submit"
+                            hx-trigger="click" 
+                            hx-post="/api/img/@Model.DocumentIdentifier/delete"
+                            hx-swap="innerHTML"
+                            hx-target="#image-upload"
+                            >
+                         Delete File <i class="fa-regular fa-trash-can ps-2"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="pb-3">
+            <input type="file" class="form-control" multiple disabled/>
+        </div>
+    }
+    else
+    {
+        <div class="pb-3">
+            <input type="file" class="form-control" multiple asp-for="File"/>
+            <span asp-validation-for="File" class="text-danger"></span>
+        </div>
+    }
+</div>

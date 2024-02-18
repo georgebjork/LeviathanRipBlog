@@ -1,0 +1,45 @@
+@using LeviathanRipBlog.Helpers
+@model LeviathanRipBlog.Web.Models.Blog.ViewModels.BlogViewModel
+
+@{
+    ViewData["Title"] = Model.Blog.title;
+}
+
+<div>
+    <article>
+
+        <div class="d-flex justify-content-end">
+            <a class="btn btn-link" asp-controller="Campaign" asp-action="ViewCampaign" asp-route-CampaignId="@Model.Blog.campaign_id"> Back to Campaign </a>
+        </div>
+        <div class="w-100 text-center">
+            <figure class="mb-4">
+                <img class="img-fluid rounded" src="/api/img/@Model.Blog.document_identifier" alt="Loaded image" style="height: 500px; object-fit: contain"/>
+            </figure>
+        </div>
+            
+        <!-- Post title-->
+        <h1 class="fw-bolder mb-1">@Model.Blog.title</h1>
+        <!-- Post meta content-->
+        <div class="text-muted fst-italic mb-2">Posted on: @Model.Blog.publish_date.ConvertUtcToFormattedDate() by @Model.Blog.created_by</div>
+
+        <div class="text-muted fst-italic mb-2">Campaign:  @Model.Blog.campaign_name</div>
+            
+        <div class="d-flex justify-content-between">
+            <div class="text-muted fst-italic">Session on: @Model.Blog.session_date.ConvertUtcToFormattedDate()</div>
+                
+            @if (ViewBag.IsUserAuthorized) {
+                <div class="d-flex justify-content-end align-items-center pb-3 ">
+                    <a class="btn btn-secondary" asp-controller="Blog" asp-action="EditBlog" asp-route-CampaignId="@Model.Blog.campaign_id" asp-route-BlogId="@Model.Blog.id">
+                        Edit <i class="fa-solid fa-pen-to-square ps-2"></i>
+                    </a>
+                </div>
+            }
+        </div>
+
+        <hr/>
+
+        <section class="mb-5">
+            <div class="lead fs-5" style="white-space: pre-wrap;">@Model.Blog.blog_content</div>
+        </section>
+    </article>
+</div>
