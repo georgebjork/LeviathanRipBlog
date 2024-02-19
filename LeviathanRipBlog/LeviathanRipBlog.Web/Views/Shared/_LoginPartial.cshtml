@@ -22,7 +22,7 @@
                 @if (User.IsInRole(Roles.ADMIN))
                 {
                     <li>
-                        <a class="dropdown-item"><i class="fa-solid fa-users pe-2 text-success"></i> Manage Users</a>
+                        <a class="dropdown-item" asp-controller="ManageUsers" asp-action="ManageUsers" ><i class="fa-solid fa-users pe-2 text-success"></i> Manage Users</a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
                 }

@@ -4,6 +4,7 @@ using LeviathanRipBlog.Web.Services;
 using LeviathanRipBlog.Web.Services.Authorization;
 using LeviathanRipBlog.Web.Services.Blog;
 using LeviathanRipBlog.Web.Services.Campaign;
+using LeviathanRipBlog.Web.Services.ManageUsers;
 namespace LeviathanRipBlog.Web;
 
 public static class RegisterServices {
@@ -23,5 +24,6 @@ public static class RegisterServices {
         
         services.AddTransient<IBlogService, BlogService>();
         services.AddTransient<ICampaignService, CampaignService>();
+        services.AddTransient<IManageUsersService, ManageUsersService>();
     }
 }

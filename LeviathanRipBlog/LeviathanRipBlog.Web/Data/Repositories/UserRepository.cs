@@ -10,7 +10,6 @@ public interface IUserRepository : IBaseRepository
 {
     Task<List<ApplicationUser>> GetUsers();
     
-    
     // User Invites
     Task<List<user_invitation>> GetInvites();
     Task<user_invitation?> GetInvite(string inviteId);
