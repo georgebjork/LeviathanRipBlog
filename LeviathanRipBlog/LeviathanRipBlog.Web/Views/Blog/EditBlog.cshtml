@@ -1,13 +1,29 @@
 @model LeviathanRipBlog.Web.Models.Blog.FormModels.BlogFormModel
 
 @{
-    ViewData["Title"] = "Create Blog";
+    ViewData["Title"] = "Edit Blog";
 }
 
-<div class="row pt-3">
-    <h1>
-        Edit Blog
-    </h1>
+<div class="row pt-3 d-flex justify-content-between">
+    <div class="col-auto">
+        <h1>
+            Edit Blog
+        </h1>
+    </div>
+    
+    
+    <div class="col-auto">
+        <form method="post" asp-controller="Blog" asp-action="DeleteBlog" asp-route-CampaignId="@Model.CampaignId" asp-route-BlogId="@Model.BlogId" enctype="multipart/form-data">
+            <input type="hidden" asp-for="IsDeleted" value="true" />
+            <div class="col-auto">
+                <button class="btn btn-danger" type="submit" onclick="return confirm('Are you sure you want to delete?');">
+                    Delete <i class="fa-regular fa-trash-can ps-2"></i>
+                </button>
+            </div>
+        </form>
+        
+    </div>
+    
 </div>
 
 <div class="row pt-1">
@@ -28,7 +44,7 @@
     
     <div class="col-12">
         <button class="btn btn-primary w-100" type="submit">
-            Create Blog
+            Update Blog
         </button>
     </div>
 </form>

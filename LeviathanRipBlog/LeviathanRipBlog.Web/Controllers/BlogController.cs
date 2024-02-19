@@ -9,6 +9,7 @@ using LeviathanRipBlog.Web.Services.Documents;
 using LeviathanRipBlog.Web.Settings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 namespace LeviathanRipBlog.Web.Controllers;
 
 public class BlogController : BaseController {
@@ -77,6 +78,12 @@ public class BlogController : BaseController {
     public async Task<IActionResult> CreateBlog(long CampaignId, BlogFormModel form) {
         
         if (!ModelState.IsValid) return View(form);
+
+        if (form.File is null)
+        {
+            ModelState.AddModelError("File", "An image is required.");
+            return View(form);
+        }
         
         // Upload file
         if (!documentStorage.IsValidImage(form.File!))
@@ -106,6 +113,11 @@ public class BlogController : BaseController {
         
         if (!ModelState.IsValid) return View(nameof(EditBlog), form);
 
+        if(form.File is null && form.DocumentIdentifier.IsNullOrEmpty() && form.DocumentName.IsNullOrEmpty()) {
+            ModelState.AddModelError("File", "An image is required to update the blog.");
+            return View(form);
+        }
+        
         var document = new SavedDocumentResponse();
         if (form.File is not null)
         {
@@ -128,4 +140,28 @@ public class BlogController : BaseController {
         SetSuccessMessage("Blog updated successfully.");
         return RedirectToAction(nameof(ViewBlog), new { CampaignId, BlogId });
     }
+    
+    
+    [Authorize(Policy = Policy.CanEditBlog)]
+    [HttpPost]
+    [Route("campaign/{CampaignId:long}/blog/{BlogId:long}/delete")]
+    public async Task<IActionResult> DeleteBlog(long CampaignId, long BlogId, [FromForm] BlogFormModel form) {
+        
+        form.CampaignId = CampaignId;
+        form.BlogId = BlogId;
+        
+        var rv = await blogService.UpdateBlog(form);
+        
+        if(rv == false) {
+            SetErrorMessage("Failed to delete blog. Please try again.");
+            return View(nameof(EditBlog), form);
+        }
+        
+        _logger.LogInformation("User {User} deleted blog {Id}", BlogId, usernameRetriever.Username);
+        SetErrorMessage("Blog deleted successfully.");
+        return RedirectToAction("ViewCampaign", "Campaign", new { CampaignId});
+
+    }
+    
+    
 }

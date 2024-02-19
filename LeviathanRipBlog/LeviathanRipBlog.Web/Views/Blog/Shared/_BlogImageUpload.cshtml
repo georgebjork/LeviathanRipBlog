@@ -2,6 +2,10 @@
 @model LeviathanRipBlog.Web.Models.Blog.FormModels.BlogFormModel
 
 <div class="row pb-3">
+    
+    <input type="hidden" asp-for="DocumentIdentifier" value="@(Model.DocumentIdentifier ?? "")"/>
+    <input type="hidden" asp-for="DocumentName" value="@(Model.DocumentName ?? "")"/>
+
     @if (!Model.DocumentIdentifier.IsNullOrEmpty())
     {
         <div>
@@ -11,12 +15,11 @@
                         <i class="fa-solid fa-image pe-2"></i> @Model.DocumentName
                     </div>
                     <button class="btn btn-danger btn-sm" type="submit"
-                            hx-trigger="click" 
+                            hx-trigger="click"
                             hx-post="/api/img/@Model.DocumentIdentifier/delete"
                             hx-swap="innerHTML"
-                            hx-target="#image-upload"
-                            >
-                         Delete File <i class="fa-regular fa-trash-can ps-2"></i>
+                            hx-target="#image-upload">
+                        Delete File <i class="fa-regular fa-trash-can ps-2"></i>
                     </button>
                 </li>
             </ul>

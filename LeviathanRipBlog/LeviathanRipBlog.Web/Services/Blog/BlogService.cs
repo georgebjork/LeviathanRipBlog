@@ -99,6 +99,7 @@ public class BlogService : IBlogService {
         }
         
         blog.title = form.Title;
+        blog.is_deleted = form.IsDeleted;
         blog.blog_content = form.Content;
         blog.session_date = form.SessionDate;
         blog.updated_by = usernameRetriever.Username;
@@ -106,18 +107,23 @@ public class BlogService : IBlogService {
         
         var rv = await blogRepository.Update(blog.ToBlog());
         
-        // If not null, then we have a new file to upload and will update our record accordingly
-        if (form.File is null) return rv;
+        // If not null, then we have a new file to upload and will update our record accordingly. 
+        // But, if deleted is true, then we need to update the record to reflect that.
+        if (form.File is null && !form.IsDeleted) return rv;
         
         var document = await documentRepository.GetDocumentByBlogId(form.BlogId);
 
         if (document is null) return rv;
-        
-        document.document_name = form.File!.FileName;
-        document.document_identifier = documentIdentifier;
+
+        document.is_deleted = form.IsDeleted;
         document.updated_by = usernameRetriever.Username;
         document.updated_on = DateTime.UtcNow;
-
+        
+        if (!form.IsDeleted && form.File is not null)
+        {
+            document.document_name = form.File!.FileName;
+            document.document_identifier = documentIdentifier;
+        }
         await documentRepository.Update(document);
 
         return rv;

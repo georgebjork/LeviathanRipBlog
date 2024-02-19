@@ -40,6 +40,8 @@ public class ImageController : BaseController {
         var success = await documentStorage.RemoveFile(imgId);
         if (success)
         {
+            model.DocumentIdentifier = "";
+            model.DocumentName = "";
             return PartialView("~/Views/Blog/Shared/_BlogImageUpload.cshtml", model);
         }
         return PartialView("~/Views/Blog/Shared/_BlogImageUpload.cshtml", model);

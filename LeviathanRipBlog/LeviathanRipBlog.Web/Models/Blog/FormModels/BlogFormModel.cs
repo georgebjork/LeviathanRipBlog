@@ -15,11 +15,11 @@ public class BlogFormModel {
     [Display(Name = "Session Date")]
     public DateTime SessionDate { get; set; } = DateTime.UtcNow;
     
-    [Required]
     public IFormFile? File { get; set; }
     
     public long CampaignId { get; set; }
     public long BlogId { get; set; }
-    public string DocumentIdentifier { get; set; } = "";
-    public string DocumentName { get; set; } = "";
+    public string? DocumentIdentifier { get; set; } = "";
+    public string? DocumentName { get; set; } = "";
+    public bool IsDeleted { get; set; }
 }
