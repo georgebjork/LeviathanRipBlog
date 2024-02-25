@@ -39,7 +39,8 @@
         <hr/>
 
         <section class="mb-5">
-            <div class="lead fs-5" style="white-space: pre-wrap;">@Model.Blog.blog_content</div>
+            <div class="lead fs-5" style="white-space: pre-wrap;">@Html.Raw(Model.Blog.blog_content)</div>
         </section>
+
     </article>
 </div>

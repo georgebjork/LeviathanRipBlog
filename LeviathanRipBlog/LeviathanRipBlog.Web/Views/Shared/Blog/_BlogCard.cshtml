@@ -17,7 +17,7 @@
             <a asp-controller="Campaign" asp-action="ViewCampaign" asp-route-CampaignId="@Model.campaign_id">@Model.campaign_name</a>
         </div>
         
-        <p class="card-text mt-3">@Model.blog_content.Truncate(50)</p>
+        <p class="card-text mt-3">@Html.Raw(Model.blog_content.Truncate(50)))</p>
         
         <div class="d-flex justify-content-between">
             <a class="btn btn-primary" asp-controller="Blog" asp-action="ViewBlog" asp-route-CampaignId="@Model.campaign_id" asp-route-BlogId="@Model.id">

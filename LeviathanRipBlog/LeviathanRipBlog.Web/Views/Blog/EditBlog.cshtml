@@ -48,3 +48,21 @@
         </button>
     </div>
 </form>
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function() {
+            tinymce.init({
+                selector: '#tinymce',
+                base_url: '/lib/tinymce/js/tinymce', 
+                suffix: '.min',
+                menubar: false,
+                content_css: 'tinymce-5-dark',
+                skin: 'tinymce-5-dark',
+                // Add your TinyMCE configuration options here
+              });
+        });
+    </script>
+}
