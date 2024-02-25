@@ -33,9 +33,10 @@ public class ManageUsersController : BaseAuthorizedController {
         }
 
         var invites = await manageUsersService.GetInvites();
+        var baseUrl = $"{Request.Scheme}://{Request.Host.Value}";
         foreach (var invite in invites)
         {
-            invite.InviteUrl = Url.Content($"~/register/{invite.invitation_identifier}");
+            invite.InviteUrl = $"{baseUrl}/register/{invite.invitation_identifier}";
         }
 
         var vm = new ManageUserViewModel {
@@ -45,6 +46,15 @@ public class ManageUsersController : BaseAuthorizedController {
         
         return View(vm);
     }
+
+
+    [Route("invite-user")]
+    public async Task<IActionResult> InviteUser([FromForm(Name = "InviteFormModel")] UserInviteFormModel form)
+    {
+        var invite = await manageUsersService.CreateInvite(form.Email);
+        return RedirectToAction(nameof(ManageUsers));
+    }
+    
     
     [Route("/update-user-role/{userId}")]
     [HttpPost]
@@ -71,5 +81,14 @@ public class ManageUsersController : BaseAuthorizedController {
         return Content("");
     }
     
-    
+    [Route("/revoke-invite/{inviteId}")]
+    [HttpPost]
+    public async Task<IActionResult> RevokeInvite(string inviteId)
+    {
+        var rv = await manageUsersService.RevokeInvite(inviteId);
+        
+        if(!rv) RedirectToAction(nameof(ManageUsers));
+        
+        return Content("");
+    }
 }

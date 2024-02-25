@@ -12,8 +12,11 @@ public interface IManageUsersService {
     Task<List<user_invitation>> GetInvites();
     Task<user_invitation?> GetInvite(string inviteId);
 
+    Task<user_invitation> CreateInvite(string email);
+
     Task<ApplicationUser> PromoteAdmin(string userId);
     Task<ApplicationUser> RevokeAdmin(string userId);
+    Task<bool> RevokeInvite(string inviteId);
     
     Task<IdentityResult> RemoveUser(string userId);
 }
@@ -21,11 +24,13 @@ public interface IManageUsersService {
 public class ManageUsersService : IManageUsersService {
     
     private readonly IUserRepository _userRepository;
+    private readonly IUsernameRetriever _usernameRetriever;
     private readonly UserManager<ApplicationUser> _userManager;
     
-    public ManageUsersService(IUserRepository userRepository, UserManager<ApplicationUser> userManager) {
+    public ManageUsersService(IUserRepository userRepository, UserManager<ApplicationUser> userManager, IUsernameRetriever usernameRetriever) {
         _userRepository = userRepository;
         _userManager = userManager;
+        _usernameRetriever = usernameRetriever;
     }
     
     public async Task<List<ApplicationUser>> GetUsers() {
@@ -39,7 +44,28 @@ public class ManageUsersService : IManageUsersService {
     public async Task<user_invitation?> GetInvite(string inviteId) {
         return await _userRepository.GetInvite(inviteId);
     }
-    
+
+    public async Task<user_invitation> CreateInvite(string email)
+    {
+        var date = DateTime.UtcNow;
+        var username = _usernameRetriever.Username;
+        
+        var invite = new user_invitation
+        {
+            invitation_identifier = Guid.NewGuid().ToString(),
+            sent_to_email = email,
+            sent_by_user = username,
+            expires_on = date.AddDays(30),
+            created_on = date,
+            created_by = username,
+            updated_on = date,
+            updated_by = username
+        };
+        
+        await _userRepository.Insert(invite);
+        return invite;
+    }
+
     public async Task<ApplicationUser> PromoteAdmin(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
@@ -71,6 +97,19 @@ public class ManageUsersService : IManageUsersService {
         
         user.IsAdmin = false;
         return user;
+    }
+
+    public async Task<bool> RevokeInvite(string inviteId)
+    {
+        var invite = await GetInvite(inviteId);
+
+        if (invite is null) return true;
+        
+        invite.is_deleted = true;
+        invite.updated_by = _usernameRetriever.Username;
+        invite.updated_on = DateTime.UtcNow;
+
+        return await _userRepository.Update(invite);
     }
 
     public async Task<IdentityResult> RemoveUser(string userId)
