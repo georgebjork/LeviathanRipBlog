@@ -1,6 +1,7 @@
 using LeviathanRipBlog.Web.Controllers.BaseControllers;
 using LeviathanRipBlog.Web.Data;
-using LeviathanRipBlog.Web.Models.ManageUsers;
+using LeviathanRipBlog.Web.Models.ManageUsers.FormModels;
+using LeviathanRipBlog.Web.Models.ManageUsers.ViewModels;
 using LeviathanRipBlog.Web.Services;
 using LeviathanRipBlog.Web.Services.ManageUsers;
 using LeviathanRipBlog.Web.Settings;
@@ -43,6 +44,31 @@ public class ManageUsersController : BaseAuthorizedController {
         };
         
         return View(vm);
+    }
+    
+    [Route("/update-user-role/{userId}")]
+    [HttpPost]
+    public async Task<IActionResult> UpdateUserRole(string userId)
+    {
+        var user = await UserManager.FindByIdAsync(userId);
+        
+        // If admin then revoke
+        if (await UserManager.IsInRoleAsync(user!, Roles.ADMIN))
+        {
+            var regUser = await manageUsersService.RevokeAdmin(userId);
+            return PartialView("Shared/_UserTableRecord", regUser);
+        }
+        
+        var adminUser = await manageUsersService.PromoteAdmin(userId);
+        return PartialView("Shared/_UserTableRecord", adminUser);
+    }
+    
+    [Route("/remove-user/{userId}")]
+    [HttpPost]
+    public async Task<IActionResult> RemoveUser(string userId)
+    {
+        var rv = await manageUsersService.RemoveUser(userId);
+        return Content("");
     }
     
     

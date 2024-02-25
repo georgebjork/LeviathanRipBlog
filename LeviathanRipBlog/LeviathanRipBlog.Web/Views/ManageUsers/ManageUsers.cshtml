@@ -1,4 +1,5 @@
-@model LeviathanRipBlog.Web.Models.ManageUsers.ManageUserViewModel
+
+@model LeviathanRipBlog.Web.Models.ManageUsers.ViewModels.ManageUserViewModel
 
 @{
     ViewData["Title"] = "Manage Users";
@@ -26,7 +27,7 @@
                     <tbody>
                         @foreach (var user in Model.Users)
                         {
-                            @(await Html.PartialAsync("Shared/_UserTableRecord", user))
+                            @(await Html.PartialAsync("Shared/_UserTableRecord", user));
                         }
                     </tbody>
                 </table>

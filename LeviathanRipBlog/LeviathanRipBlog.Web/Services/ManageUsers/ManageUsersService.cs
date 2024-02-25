@@ -14,40 +14,42 @@ public interface IManageUsersService {
 
     Task<ApplicationUser> PromoteAdmin(string userId);
     Task<ApplicationUser> RevokeAdmin(string userId);
+    
+    Task<IdentityResult> RemoveUser(string userId);
 }
 
 public class ManageUsersService : IManageUsersService {
     
-    private readonly IUserRepository userRepository;
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly IUserRepository _userRepository;
+    private readonly UserManager<ApplicationUser> _userManager;
     
     public ManageUsersService(IUserRepository userRepository, UserManager<ApplicationUser> userManager) {
-        this.userRepository = userRepository;
-        this.userManager = userManager;
+        _userRepository = userRepository;
+        _userManager = userManager;
     }
     
     public async Task<List<ApplicationUser>> GetUsers() {
-        return await userRepository.GetUsers();
+        return await _userRepository.GetUsers();
     }
     
     public async Task<List<user_invitation>> GetInvites() {
-        return await userRepository.GetInvites();
+        return await _userRepository.GetInvites();
     }
     
     public async Task<user_invitation?> GetInvite(string inviteId) {
-        return await userRepository.GetInvite(inviteId);
+        return await _userRepository.GetInvite(inviteId);
     }
     
     public async Task<ApplicationUser> PromoteAdmin(string userId)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await _userManager.FindByIdAsync(userId);
 
         if (user == null) throw new NullReferenceException("User not found");
         
         // Add to role
-        if (await userManager.IsInRoleAsync(user, Roles.ADMIN)) return user;
+        if (await _userManager.IsInRoleAsync(user, Roles.ADMIN)) return user;
         
-        await userManager.AddToRoleAsync(user, Roles.ADMIN);
+        await _userManager.AddToRoleAsync(user, Roles.ADMIN);
         user.IsAdmin = true;
 
         return user;
@@ -55,28 +57,28 @@ public class ManageUsersService : IManageUsersService {
 
     public async Task<ApplicationUser> RevokeAdmin(string userId)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await _userManager.FindByIdAsync(userId);
 
         if (user == null) throw new NullReferenceException("User not found");
         
         // Remove from role and make sure they're in the user role
-        await userManager.RemoveFromRoleAsync(user, Roles.ADMIN);
+        await _userManager.RemoveFromRoleAsync(user, Roles.ADMIN);
         
-        if(!await userManager.IsInRoleAsync(user, Roles.USER))
+        if(!await _userManager.IsInRoleAsync(user, Roles.USER))
         {
-            await userManager.AddToRoleAsync(user, Roles.USER);
+            await _userManager.AddToRoleAsync(user, Roles.USER);
         }
         
         user.IsAdmin = false;
         return user;
     }
 
-    private async Task RemoveUser(string userId)
+    public async Task<IdentityResult> RemoveUser(string userId)
     {
-        var user = await userManager.FindByIdAsync(userId);
+        var user = await _userManager.FindByIdAsync(userId);
         
         if (user is null) throw new NullReferenceException("User not found"); 
         
-        await userManager.DeleteAsync(user);
+        return await _userManager.DeleteAsync(user);
     }
 }
