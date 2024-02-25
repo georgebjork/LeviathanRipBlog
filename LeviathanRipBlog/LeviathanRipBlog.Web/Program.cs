@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using S3Settings=LeviathanRipBlog.Web.Settings.S3Settings;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,9 +77,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddMvc();
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
-// S3 Service Setting
-builder.Services.Configure<S3Settings>(builder.Configuration.GetSection("Spaces"));
-
 var spacesUrl = builder.Configuration.GetSection("Spaces")["SpacesUrl"];
 
 if (!spacesUrl.IsNullOrEmpty())
@@ -93,6 +89,7 @@ else
 }
 
 // Register all services
+ConfigureSettings(builder.Services, builder.Configuration);
 RegisterServices.ConfigureServices(services: builder.Services);
 
 var app = builder.Build();
@@ -132,6 +129,11 @@ using (var scope = app.Services.CreateScope()) {
 }
 
 app.Run();
+
+void ConfigureSettings(IServiceCollection services, IConfiguration config) {
+    services.Configure<S3Settings>(config.GetSection("Spaces"));
+}
+
 
 
 async Task CreateRoles(IServiceProvider serviceProvider) {
