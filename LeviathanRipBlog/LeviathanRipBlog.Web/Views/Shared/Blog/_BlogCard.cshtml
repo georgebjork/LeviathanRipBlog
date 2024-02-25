@@ -5,7 +5,7 @@
 
 <div class="card mb-4">
     <div >
-        <img class="card-img-top pt-3" alt="@Model.document_identifier" src="/api/img/@Model.document_identifier" style="height: 300px; object-fit: contain"/>
+        <img class="card-img-top pt-3" alt="Loading image..." src="/api/img/@Model.document_identifier" style="height: 300px; object-fit: contain"/>
     </div>
     <div class="card-body">
         <h2 class="card-title h4">
@@ -17,7 +17,7 @@
             <a asp-controller="Campaign" asp-action="ViewCampaign" asp-route-CampaignId="@Model.campaign_id">@Model.campaign_name</a>
         </div>
         
-        <p class="card-text mt-3">@Html.Raw(Model.blog_content.Truncate(50)))</p>
+        <p class="card-text mt-3">@Html.Raw(Model.blog_content.Truncate(50))</p>
         
         <div class="d-flex justify-content-between">
             <a class="btn btn-primary" asp-controller="Blog" asp-action="ViewBlog" asp-route-CampaignId="@Model.campaign_id" asp-route-BlogId="@Model.id">

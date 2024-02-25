@@ -13,13 +13,7 @@ using S3Settings=LeviathanRipBlog.Web.Settings.S3Settings;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddOutputCache(options =>
-{
-    options.AddBasePolicy(builder => 
-        builder.Expire(TimeSpan.FromSeconds(10)));
-    options.AddPolicy("ExpireIn12Hours", builder => 
-        builder.Expire(TimeSpan.FromHours(12)));
-});
+builder.Services.AddResponseCaching();
 
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DbConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
@@ -109,7 +103,7 @@ else
     app.UseHsts();
 }
 
-app.UseOutputCache();
+app.UseResponseCaching();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
