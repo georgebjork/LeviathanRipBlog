@@ -2,6 +2,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using LeviathanRipBlog.Services;
+using LeviathanRipBlog.Web.Settings;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.Extensions.Options;
 
@@ -135,13 +136,4 @@ public class SpacesDocumentStorage(IOptions<S3Settings> settings, ILogger<Spaces
             return false;
         }
     }
-}
-
-
-public class S3Settings
-{
-    public string SpacesUrl { get; set; } = "";
-    public string AccessKey { get; set; } = "";
-    public string SecretKey { get; set; } = "";
-    public string BucketName { get; set; } = "";
 }
