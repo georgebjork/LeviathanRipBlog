@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "provider": "cdnjs",
+      "library": "htmx@1.9.10",
+      "destination": "wwwroot/lib/htmx/"
+    },
+    {
+      "provider": "cdnjs",
+      "library": "bootstrap@5.3.2",
+      "destination": "wwwroot/lib/bootstrap/"
+    }
+  ]
+}

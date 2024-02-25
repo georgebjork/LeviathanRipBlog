@@ -1,0 +1,68 @@
+@model LeviathanRipBlog.Web.Models.Blog.FormModels.BlogFormModel
+
+@{
+    ViewData["Title"] = "Edit Blog";
+}
+
+<div class="row pt-3 d-flex justify-content-between">
+    <div class="col-auto">
+        <h1>
+            Edit Blog
+        </h1>
+    </div>
+    
+    
+    <div class="col-auto">
+        <form method="post" asp-controller="Blog" asp-action="DeleteBlog" asp-route-CampaignId="@Model.CampaignId" asp-route-BlogId="@Model.BlogId" enctype="multipart/form-data">
+            <input type="hidden" asp-for="IsDeleted" value="true" />
+            <div class="col-auto">
+                <button class="btn btn-danger" type="submit" onclick="return confirm('Are you sure you want to delete?');">
+                    Delete <i class="fa-regular fa-trash-can ps-2"></i>
+                </button>
+            </div>
+        </form>
+        
+    </div>
+    
+</div>
+
+<div class="row pt-1">
+    <div class="col-12">
+        <hr />
+    </div>
+</div>
+
+
+
+<form method="post" asp-action="EditBlog" asp-controller="Blog" enctype="multipart/form-data">
+    
+    @await Html.PartialAsync("Shared/_BlogForm")
+    
+    <div id="image-upload">
+        @await Html.PartialAsync("Shared/_BlogImageUpload")
+    </div>
+    
+    <div class="col-12">
+        <button class="btn btn-primary w-100" type="submit">
+            Update Blog
+        </button>
+    </div>
+</form>
+
+
+@section Scripts
+{
+    <script type="text/javascript">
+        $(document).ready(function() {
+            tinymce.init({
+                selector: '#tinymce',
+                base_url: '/lib/tinymce/js/tinymce', 
+                suffix: '.min',
+                menubar: false,
+                content_css: 'tinymce-5-dark',
+                skin: 'tinymce-5-dark',
+                // Add your TinyMCE configuration options here
+              });
+        });
+    </script>
+}

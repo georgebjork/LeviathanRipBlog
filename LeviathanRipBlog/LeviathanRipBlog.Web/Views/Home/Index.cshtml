@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Leviathan Rip Blog";
+}
+
+<div class="py-5 border-bottom mb-4">
+    <div class="container">
+        <div class="text-center my-5">
+            <h1 class="fw-bolder">Welcome to the Leviathan Rip Blog!</h1>
+            <p class="lead mb-0">Here you can find blogs retelling various sessions from the LeviathanRip campaign and other campaigns.</p>
+        </div>
+    </div>
+</div>
+
+
+<div class="row d-flex justify-content-center">
+    <div class="col-lg-8">
+        <h2 class="mb-3">Recent Blogs</h2>
+    </div>
+    
+    <div class="col-8">
+        <div id="recent-blogs">
+            <div hx-get="/recent-blogs"
+                 hx-trigger="load"
+                 hx-target="#recent-blogs"
+                 hx-swap="innerHTML">
+            </div>
+        </div>
+    </div>
+</div>

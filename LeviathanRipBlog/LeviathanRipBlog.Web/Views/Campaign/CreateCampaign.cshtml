@@ -1,0 +1,28 @@
+@model LeviathanRipBlog.Web.Models.Campaign.FormModels.CampaignFormModel
+
+@{
+    ViewData["Title"] = "Create Campaign";
+}
+
+<div class="row pt-3">
+    <h1>
+        Create New Campaign
+    </h1>
+</div>
+
+<div class="row pt-1">
+    <div class="col-12">
+        <hr />
+    </div>
+</div>
+
+
+<form method="post" asp-action="AddCampaign" asp-controller="Campaign" enctype="multipart/form-data">
+    @await Html.PartialAsync("Shared/_CampaignForm")
+    
+    <div class="d-grid">
+        <button class="btn btn-primary" type="submit">
+            Create Campaign
+        </button>
+    </div>
+</form>

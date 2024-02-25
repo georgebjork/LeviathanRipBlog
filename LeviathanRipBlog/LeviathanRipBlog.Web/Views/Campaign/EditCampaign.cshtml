@@ -1,0 +1,43 @@
+@model LeviathanRipBlog.Web.Models.Campaign.FormModels.CampaignFormModel
+
+@{
+    ViewData["Title"] = "Edit Campaign";
+}
+
+<div class="row pt-3">
+    <h1>
+        Edit Campaign
+    </h1>
+</div>
+
+<div class="row pt-1">
+    <div class="col-12">
+        <hr />
+    </div>
+</div>
+
+<form method="post" asp-action="DeleteCampaign" asp-controller="Campaign" enctype="multipart/form-data">
+        <input type="hidden" asp-for="CampaignId" value="@(Model.CampaignId!)"/>
+        <input type="hidden" asp-for="IsDeleted" value="true"/>
+        <input type="hidden" asp-for="Name" value="@Model.Name"/>
+        <input type="hidden" asp-for="Description" value="@Model.Description"/>
+        
+        <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete?');">
+            Delete Campaign
+        </button>
+    </div>
+</form>
+
+
+<form method="post" asp-action="UpdateCampaign" asp-controller="Campaign" enctype="multipart/form-data">
+    <input type="hidden" asp-for="CampaignId" value="@(Model.CampaignId!)"/>
+    
+    @await Html.PartialAsync("Shared/_CampaignForm")
+    
+    <div class="d-grid">
+        <button class="btn btn-primary" type="submit">
+            Update Campaign
+        </button>
+    </div>
+</form>

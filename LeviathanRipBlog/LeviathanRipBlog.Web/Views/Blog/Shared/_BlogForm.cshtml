@@ -1,0 +1,29 @@
+@model LeviathanRipBlog.Web.Models.Blog.FormModels.BlogFormModel
+
+
+    
+<div class="row pb-3 pt-3">
+    <div class="col-lg-8 col-sm-12 pb-3">
+        <div class="form-floating mb-3">
+            <input asp-for="Title" class="form-control" aria-required="true"/>
+            <label asp-for="Title" class="form-label"></label>
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 col-sm-12 pb-3">
+        <div class="form-floating mb-3">
+            <input asp-for="SessionDate" class="form-control" aria-required="true" type="date"/>
+            <label asp-for="SessionDate" class="form-label"></label>
+            <span asp-validation-for="SessionDate" class="text-danger"></span>
+        </div>
+    </div>
+</div>
+
+<div class="row pb-3">
+    <div class="col-lg-12 col-sm-12 pb-3">
+        <textarea asp-for="Content" id="tinymce" class="form-control" placeholder="Your blog content goes here." rows="15"></textarea>
+        <label for="tinymce" class="form-label"></label>
+        <span asp-validation-for="Content" class="text-danger"></span>
+    </div>
+</div>
