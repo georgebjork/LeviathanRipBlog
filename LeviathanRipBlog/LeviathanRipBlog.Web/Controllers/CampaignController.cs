@@ -101,6 +101,20 @@ public class CampaignController : BaseController {
         return View(form);
     }
     
+    [Route("/campaigns/{CampaignId:long}/timeline")]
+    public async Task<IActionResult> Timeline([FromRoute] long CampaignId) {
+        
+        var campaign = await campaignService.GetCampaignById(CampaignId);
+        var blogs = await blogService.GetCampaignBlogs(CampaignId);
+        
+        var vm = new CampaignViewModel {
+            Campaign = campaign,
+            Blogs = blogs
+        };
+
+        return View(vm);
+    }
+    
     [HttpPost]
     [Route("/campaigns/add")]
     [Authorize]
