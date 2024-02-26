@@ -10,7 +10,7 @@ public interface IManageUsersService {
     
     // User Invites
     Task<List<user_invitation>> GetInvites();
-    Task<user_invitation?> GetInvite(string inviteId);
+    Task<user_invitation?> GetValidInvite(string inviteId);
 
     Task<user_invitation> CreateInvite(string email);
 
@@ -41,7 +41,7 @@ public class ManageUsersService : IManageUsersService {
         return await _userRepository.GetInvites();
     }
     
-    public async Task<user_invitation?> GetInvite(string inviteId) {
+    public async Task<user_invitation?> GetValidInvite(string inviteId) {
         return await _userRepository.GetInvite(inviteId);
     }
 
@@ -101,7 +101,7 @@ public class ManageUsersService : IManageUsersService {
 
     public async Task<bool> RevokeInvite(string inviteId)
     {
-        var invite = await GetInvite(inviteId);
+        var invite = await GetValidInvite(inviteId);
 
         if (invite is null) return true;
         
