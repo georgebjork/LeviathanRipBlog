@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Supabase;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,10 +73,25 @@ builder.Services.AddMvc();
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
 
 var spacesUrl = builder.Configuration.GetSection("Spaces")["SpacesUrl"];
+var supabaseUrl = builder.Configuration.GetSection("Supabase")["SupabaseUrl"];
 
 if (!spacesUrl.IsNullOrEmpty())
 {
     builder.Services.AddTransient<IDocumentStorage, SpacesDocumentStorage>();
+}
+else if (!supabaseUrl.IsNullOrEmpty())
+{
+    builder.Services.AddScoped<Client>(_ =>
+        new Client(
+            builder.Configuration["SupabaseUrl"] ?? string.Empty,
+            builder.Configuration["PublicKey"],
+            new SupabaseOptions
+            {
+                AutoRefreshToken = true,
+                AutoConnectRealtime = true
+            }));
+
+    builder.Services.AddTransient<IDocumentStorage, SupabaseDocumentStorage>();
 }
 else
 {
@@ -126,6 +142,7 @@ app.Run();
 
 void ConfigureSettings(IServiceCollection services, IConfiguration config) {
     services.Configure<S3Settings>(config.GetSection("Spaces"));
+    services.Configure<SupabaseSettings>(config.GetSection("Supabase"));
 }
 
 
