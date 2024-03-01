@@ -77,14 +77,17 @@ var supabaseUrl = builder.Configuration.GetSection("Supabase")["SupabaseUrl"];
 
 if (!spacesUrl.IsNullOrEmpty())
 {
+    Console.WriteLine("Using Spaces for document storage.");
     builder.Services.AddTransient<IDocumentStorage, SpacesDocumentStorage>();
 }
 else if (!supabaseUrl.IsNullOrEmpty())
 {
+    Console.WriteLine("Using Supabase for document storage.");
     builder.Services.AddTransient<IDocumentStorage, SupabaseDocumentStorage>();
 }
 else
 {
+    Console.WriteLine("Using local file storage for document storage.");
     builder.Services.AddTransient<IDocumentStorage, FileDocumentStorage>();
 }
 
