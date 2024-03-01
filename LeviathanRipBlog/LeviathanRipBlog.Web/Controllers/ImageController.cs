@@ -18,7 +18,7 @@ public class ImageController : BaseController {
         documentStorage = document_storage;
     }
     
-    [ResponseCache(Duration = 43200)]
+    /*[ResponseCache(Duration = 43200)]*/
     [Route("/api/img/{imgId}")]
     public async Task<IResult> GetImage(string imgId) {
         

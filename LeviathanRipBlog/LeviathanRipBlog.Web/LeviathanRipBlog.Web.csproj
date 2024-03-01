@@ -25,6 +25,7 @@
     <PackageReference Include="MyTested.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="8.0.0" />
     <PackageReference Include="Npgsql" Version="8.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
+    <PackageReference Include="supabase-csharp" Version="0.15.0" />
   </ItemGroup>
 
 </Project>

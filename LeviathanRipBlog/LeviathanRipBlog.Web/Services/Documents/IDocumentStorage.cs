@@ -22,4 +22,6 @@ public interface IDocumentStorage
         };
         return validImageMimeTypes.Contains(file.ContentType.ToLowerInvariant());
     }
+    
+   
 }
