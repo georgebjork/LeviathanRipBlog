@@ -81,16 +81,6 @@ if (!spacesUrl.IsNullOrEmpty())
 }
 else if (!supabaseUrl.IsNullOrEmpty())
 {
-    builder.Services.AddScoped<Client>(_ =>
-        new Client(
-            builder.Configuration["SupabaseUrl"] ?? string.Empty,
-            builder.Configuration["PublicKey"],
-            new SupabaseOptions
-            {
-                AutoRefreshToken = true,
-                AutoConnectRealtime = true
-            }));
-
     builder.Services.AddTransient<IDocumentStorage, SupabaseDocumentStorage>();
 }
 else
