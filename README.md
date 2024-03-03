@@ -6,7 +6,7 @@ https://leviathanripshowdown.rodeo/
 
 ## Purpose
 
-LeviathanRipBlog is a centralized platform designed for my friends and me to chronicle and revisit their Dungeons & Dragons (D&D) sessions. This application serves as a digital archive where game sessions can be stored, reread, and managed.
+LeviathanRipBlog is a centralized platform designed for my friends and me to chronicle and revisit our Dungeons & Dragons (D&D) sessions. This application serves as a digital archive where game sessions can be stored, reread, and managed.
 
 ## Architecture
 
