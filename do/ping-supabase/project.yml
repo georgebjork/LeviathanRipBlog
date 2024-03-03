@@ -1,0 +1,11 @@
+
+packages:
+    - name: ping-supabase
+      functions:
+        - name: ping
+          runtime: python:default
+          web: false
+          environment: 
+            SUPABASE_URL: 
+            SUPABASE_KEY:
+
