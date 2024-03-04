@@ -23,4 +23,7 @@ LeviathanRipBlog is built on a robust and modern technology stack, ensuring a se
 ## Todo List 
 - Add campaign characters with descriptions and images
 - Timeline
-- Add username first name, and last name so email isn't displayed 
+- Add username first name, and last name so email isn't displayed
+
+## Demo Video 
+<img src="https://raw.githubusercontent.com/georgebjork/LeviathanRipBlog/main/leviathan-rip-demo-2.gif" />
