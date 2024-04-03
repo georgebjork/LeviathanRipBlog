@@ -1,9 +1,7 @@
 ﻿using Dapper;
-using LeviathanRipBlog.Web.Data;
 using LeviathanRipBlog.Web.Data.Models;
-using LeviathanRipBlog.Web.Data.Repositories;
 
-namespace LeviathanRipBlog.Data.Repositories;
+namespace LeviathanRipBlog.Web.Data.Repositories;
 
 
 public interface IUserRepository : IBaseRepository
@@ -15,14 +13,9 @@ public interface IUserRepository : IBaseRepository
     Task<user_invitation?> GetInvite(string inviteId);
 }
 
-public class UserRepository : BasePgRepository, IUserRepository
+public class UserRepository(IConfiguration configuration, ILogger<UserRepository> logger) : BasePgRepository(configuration, logger), IUserRepository
 {
-    private readonly ILogger<UserRepository> Logger;
-    
-    public UserRepository(IConfiguration configuration, ILogger<UserRepository> logger) : base(configuration, logger)
-    {
-        Logger = logger;
-    }
+    private readonly ILogger<UserRepository> logger = logger;
 
 
     public async Task<List<ApplicationUser>> GetUsers()

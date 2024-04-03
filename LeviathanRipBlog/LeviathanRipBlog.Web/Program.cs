@@ -1,6 +1,7 @@
 using LeviathanRipBlog.Services;
 using LeviathanRipBlog.Web;
 using LeviathanRipBlog.Web.Data;
+using LeviathanRipBlog.Web.Middleware;
 using LeviathanRipBlog.Web.Services.Authorization;
 using LeviathanRipBlog.Web.Services.Documents;
 using LeviathanRipBlog.Web.Settings;
@@ -113,6 +114,8 @@ app.UseResponseCaching();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+app.UseMiddleware<RequestLogMiddleware>();
+
 app.UseRouting();
 
 app.UseAuthorization();
@@ -128,6 +131,7 @@ app.MapRazorPages();
 
 
 using (var scope = app.Services.CreateScope()) {
+    await RunMigrations(scope.ServiceProvider);
     await CreateRoles(scope.ServiceProvider);
 }
 
@@ -138,7 +142,16 @@ void ConfigureSettings(IServiceCollection services, IConfiguration config) {
     services.Configure<SupabaseSettings>(config.GetSection("Supabase"));
 }
 
+Task RunMigrations(IServiceProvider serviceProvider)
+{
+    var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+    if (context.Database.GetPendingMigrations().Any())
+    {
+        context.Database.Migrate();
+    }
 
+    return Task.CompletedTask;
+}
 
 async Task CreateRoles(IServiceProvider serviceProvider) {
     //initializing custom roles 

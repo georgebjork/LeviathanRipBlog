@@ -1,0 +1,49 @@
+@model LeviathanRipBlog.Web.Models.RequestLog.RequestLogViewModel
+
+
+@{
+    ViewData["Title"] = "Request Log";
+}
+
+
+<div>
+    <div class="mt-4">
+        <div class="title"> <h3> Request Log </h3> </div>
+    </div>
+    
+    <div class="mb-2"> <hr /> </div>
+    
+    <div class="row">
+        <div class="col">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Path</th>
+                        <th>Method</th>
+                        <th>Timestamp</th>
+                        <th>IP Address</th>
+                        <th>User Agent</th>
+                        <th>User</th>
+                    </tr>
+                </thead>
+                <tbody>
+                   @foreach (var request in Model.Logs)
+                   {
+                       <tr>
+                           <td>@request.id</td>
+                           <td>@request.path</td>
+                           <td>@request.method</td>
+                           <td>@request.timestamp</td>
+                           <td>@request.ip_address</td>
+                           <td>@request.user_agent</td>
+                           <td>@request.username</td>
+                       </tr>
+                   }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+

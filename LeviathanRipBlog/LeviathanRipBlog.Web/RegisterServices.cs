@@ -17,6 +17,7 @@ public static class RegisterServices {
         services.AddTransient<IDocumentRepository, DocumentRepository>();
         services.AddTransient<IUserRepository, UserRepository>();
         services.AddTransient<IRecordOwnerRepository, RecordOwnerRepository>();
+        services.AddTransient<IRequestLogRepository, RequestLogRepository>();
         
         // Services
         services.AddTransient<IUsernameRetriever, UsernameRetriever>();
