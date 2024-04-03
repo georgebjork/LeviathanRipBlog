@@ -18,7 +18,7 @@ public class RequestLogMiddleware(RequestDelegate next, IUsernameRetriever usern
             username = usernameRetriever.Username
         };
         
-        await repository.Insert(requestLog);
+        //await repository.Insert(requestLog);
         
         await next(context);
     }
