@@ -12,7 +12,7 @@ jobs:
       - name: Checkout the repo 
         uses: actions/checkout@v2
       - name: Build image 
-        run: docker build -t leviathanrip/leviathan-rip-blog .
+        run: docker build -t skywalker/leviathan-rip-blog .
       - name: Install doctl 
         uses: digitalocean/action-doctl@v2
         with:
@@ -20,6 +20,6 @@ jobs:
       - name: Log in to DO Container Registry 
         run: doctl registry login --expiry-seconds 600
       - name: Tag image 
-        run:  docker tag leviathanrip/leviathan-rip-blog registry.digitalocean.com/leviathanrip/leviathan-rip-blog:latest
+        run:  docker tag skywalker/leviathan-rip-blog registry.digitalocean.com/skywalker/leviathan-rip-blog:latest
       - name: Push image to DO Container Registry 
-        run: docker push registry.digitalocean.com/leviathanrip/leviathan-rip-blog:latest
+        run: docker push registry.digitalocean.com/skywalker/leviathan-rip-blog:latest
