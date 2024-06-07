@@ -2,8 +2,6 @@
 
 [![Build and publish](https://github.com/georgebjork/LeviathanRipBlog/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/georgebjork/LeviathanRipBlog/actions/workflows/main.yml)
 
-https://leviathanripshowdown.rodeo/
-
 ## Purpose
 
 LeviathanRipBlog is a centralized platform designed for my friends and me to chronicle and revisit our Dungeons & Dragons (D&D) sessions. This application serves as a digital archive where game sessions can be stored, reread, and managed.
