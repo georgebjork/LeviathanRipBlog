@@ -11,11 +11,9 @@ This repository has been archived as a result.
 
 ## Purpose
 
-LeviathanRipBlog is a centralized platform designed for my friends and me to chronicle and revisit our Dungeons & Dragons (D&D) sessions. This application serves as a digital archive where game sessions can be stored, reread, and managed.
+LeviathanRipBlog is a platform designed for my friends and I to chronicle and retell our Dungeons & Dragons (D&D) sessions. This application serves as a digital archive where game sessions can be stored, reread, and managed.
 
 ## Architecture
-
-LeviathanRipBlog is built on a robust and modern technology stack, ensuring a seamless and interactive user experience:
 
 - **Framework:** ASP.NET MVC on .NET 8.
 - **Front-end:** Bootstrap 5.3, Font Awesome icons, and HTMX to add interactivity.
